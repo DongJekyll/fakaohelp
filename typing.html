@@ -1,0 +1,2782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>法考四页纸打字工作台 V4</title>
+<style>
+:root{
+  --bg:#f4f1ea; --surface:#fffdf8; --ink:#2c2a25; --muted:#8d8779;
+  --line:#e5dfd2; --accent:#a63a3a; --accent-dark:#8c2f2f; --accent-bg:#f7e9e6;
+  --green:#1e6b45; --green-bg:#e9f4ed; --blue:#31607d; --blue-bg:#e9f1f6;
+  --rose:#a85560; --rose-bg:#f7ecee; --ok-dim:#a9b5aa; --bad:#c0392b;
+  --shadow:0 1px 3px rgba(60,50,30,.08),0 4px 14px rgba(60,50,30,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--ink);min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  font-size:15px;line-height:1.6;
+}
+.hidden{display:none !important}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:22px 18px 60px}
+
+/* ============ 首页 ============ */
+.home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;padding:6px 2px 16px;border-bottom:2px solid var(--ink)}
+.brand h1{font-size:26px;letter-spacing:1px}
+.brand .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.streak-box{text-align:right;flex-shrink:0}
+.streak-num{font-size:24px;font-weight:700;color:var(--accent)}
+.streak-label{font-size:12px;color:var(--muted)}
+
+.today-strip{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.stat-chip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 16px;min-width:118px;box-shadow:var(--shadow)}
+.stat-chip .v{font-size:20px;font-weight:700}
+.stat-chip .k{font-size:12px;color:var(--muted)}
+.stat-chip.today-done .v{color:var(--accent)}
+
+.mode-row{margin:18px 0 6px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:var(--shadow)}
+.seg button{padding:8px 22px;border-radius:9px;font-size:15px;color:var(--muted);transition:all .15s}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.mode-desc{font-size:13px;color:var(--muted);margin-top:8px}
+
+.action-row{display:flex;gap:12px;margin:16px 0 8px;flex-wrap:wrap}
+.plan-box{border:1.5px dashed var(--accent);border-radius:12px;padding:12px 16px;margin:14px 0 0;
+  background:var(--accent-bg);display:flex;flex-direction:column;gap:7px}
+.plan-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px}
+.plan-cd{font-size:17px;font-weight:800;color:var(--accent-dark)}
+.plan-date{font-size:12px;color:var(--muted)}
+.plan-task{font-size:13.5px;color:var(--ink);line-height:1.55}
+.plan-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.plan-done{font-size:12.5px;color:var(--muted)}
+#examDate{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;
+  background:var(--surface);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:12px;font-size:16px;font-weight:600;
+  background:var(--surface);border:1.5px solid var(--line);color:var(--ink);transition:all .15s;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-dark);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.small{padding:7px 14px;font-size:13px;font-weight:500}
+
+.overall{margin:14px 0 20px;font-size:13px;color:var(--muted)}
+.overall .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.overall .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#c98a3a);border-radius:4px;transition:width .3s}
+
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.topic-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);
+  cursor:pointer;transition:all .15s;text-align:left;display:block;width:100%}
+.topic-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.t-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  background:var(--line);color:var(--muted);font-size:13px;font-weight:700;margin-right:8px;vertical-align:middle}
+.t-num.started{background:var(--accent-bg);color:var(--accent)}
+.t-num.mastered{background:var(--green-bg);color:var(--green)}
+.t-title{font-size:14.5px;font-weight:600;line-height:1.45;display:inline;vertical-align:middle}
+.t-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:10px 0 5px}
+.t-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.t-bar i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .3s}
+
+.howto{margin:24px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px;box-shadow:var(--shadow)}
+.howto summary{cursor:pointer;padding:12px 0;font-weight:600;font-size:14px;color:var(--accent)}
+.howto ol{padding:0 0 12px 20px;color:var(--muted);font-size:13.5px}
+.howto li{margin:5px 0}
+.howto b{color:var(--ink)}
+
+.settings{margin:24px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.settings h3{font-size:14px;margin-bottom:10px}
+.settings .row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none}
+.switch input{width:17px;height:17px;accent-color:var(--accent)}
+.fine{font-size:12px;color:var(--muted);margin-top:10px}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.8}
+footer .sig{display:inline-block;margin-top:6px;font-size:12.5px;letter-spacing:2px;color:#8a6d3b;font-weight:600}
+
+/* ============ 练习页 ============ */
+.p-top{display:flex;align-items:center;gap:14px;padding:4px 0 12px;border-bottom:2px solid var(--ink)}
+.p-back{font-size:14px;color:var(--muted);padding:6px 10px;border-radius:8px}
+.p-back:hover{background:var(--line);color:var(--ink)}
+.p-info{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.p-nav{display:flex;gap:6px;flex-shrink:0}
+.p-nav-btn{font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.p-nav-btn:hover{background:var(--line)}
+.p-nav-btn:disabled{opacity:.35;cursor:default}
+.p-topic{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-pos{font-size:13px;color:var(--muted);white-space:nowrap}
+.badge{flex-shrink:0;font-size:12px;padding:3px 10px;border-radius:20px;background:var(--accent-bg);color:var(--accent);font-weight:600}
+.lv-badge{background:var(--surface);border:1px solid var(--line);color:var(--ink);letter-spacing:1px;cursor:help}
+.t-lv{font-size:11.5px;color:var(--muted);letter-spacing:.5px}
+
+.p-hints{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 8px}
+.fade-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px}
+.fade-row-label{font-size:13px;font-weight:600;color:var(--muted)}
+.fade-row-note{font-size:12px;color:var(--muted)}
+.seg-sm button{padding:5px 12px;font-size:13px;border-radius:7px}
+.hint-chip{font-size:14.5px;padding:6px 14px;border-radius:8px;line-height:1.55}
+.hint-chip.logic{background:var(--rose-bg);color:var(--rose)}
+.hint-chip.law{background:var(--blue-bg);color:var(--blue)}
+.hint-chip.note{background:#efede6;color:var(--muted)}
+.hint-chip b{font-weight:700;margin-right:2px}
+
+.p-progress{height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin:12px 0 4px}
+.p-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#c98a3a);transition:width .12s}
+
+.p-text-wrap{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+  max-height:44vh;overflow-y:auto;padding:20px 24px;margin:12px 0;scroll-behavior:smooth}
+.p-text{font-size:clamp(19px,2.5vw,23px);line-height:2.2;letter-spacing:.5px;word-break:break-all}
+.p-text-wrap.fs-s .p-text{font-size:clamp(15px,1.9vw,17.5px);line-height:1.95}
+.p-text-wrap.fs-l .p-text{font-size:clamp(22px,3vw,28px);line-height:2.3}
+.p-text-wrap.fs-s .p-input{font-size:15px}
+.p-text-wrap.fs-l .p-input{font-size:19px}
+.f-note{font-size:12px;color:var(--muted);font-weight:400;margin-left:8px}
+.recall-skel{font-size:clamp(15px,1.9vw,18px);line-height:2;color:var(--ink);word-break:break-all}
+.ch{border-radius:4px;padding:1px 0;transition:background .08s,color .08s}
+.sk-cut{color:#b9b2a2;font-weight:700;padding:0 3px;user-select:none;cursor:help}
+.ch.kw{color:#155a39;box-shadow:inset 0 -3px 0 rgba(30,107,69,.22)}
+.ch.ok{color:var(--ok-dim)}
+.ch.ok.kw{color:#8fb5a0}
+.ch.rv{color:#3b82c4;border-bottom:2px dashed #3b82c4;font-weight:700}
+.ch.rv.ok{color:#3b82c4}
+.ch.bad{background:var(--bad);color:#fff;font-weight:700}
+.ch.auto{color:#b9b2a2}
+.ch.ig{color:#b3ab96}
+.rc-skel .ig{color:#c9c2b2}
+.ch.cur{background:#f3d47e;box-shadow:inset 0 -3px 0 rgba(166,58,58,.55)}
+
+.p-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:8px 2px}
+.p-stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+.p-input-wrap{margin-top:6px}
+#pInput{display:block;width:100%;min-height:96px;max-height:240px;resize:none;overflow-y:auto;
+  font-size:17px;line-height:1.9;letter-spacing:.5px;padding:12px 16px;border:2px solid var(--line);border-radius:12px;
+  background:var(--surface);color:var(--ink);outline:none;font-family:inherit;transition:border-color .15s;word-break:break-all}
+#pInput:focus{border-color:var(--accent)}
+#pInput:read-only{background:#f0ede4;color:var(--muted)}
+.p-actions{display:flex;gap:10px;margin-top:10px}
+.recall-cover{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;box-shadow:var(--shadow);
+  min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  margin:12px 0;text-align:center;padding:24px}
+.recall-cover .rc-big{font-size:19px;font-weight:700;letter-spacing:3px;color:var(--muted)}
+.recall-cover .rc-sub{font-size:13px;color:var(--muted)}
+.rc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.rc-level{font-size:12.5px;padding:3px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent);font-weight:600}
+.rc-skel-wrap{width:100%;max-height:230px;overflow-y:auto;background:#faf7f0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;text-align:left}
+.rc-skel{font-size:17px;line-height:2.05;letter-spacing:.5px;word-break:break-all}
+.rc-skel .kw{color:var(--green);font-weight:700}
+.rc-skel .dot{color:#d9d3c5}
+.rc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;width:100%}
+.hint-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.hint-row-label{font-size:13px;font-weight:600;color:var(--muted)}
+.hint-row-note{font-size:12px;color:var(--muted)}
+.resume-box{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin-top:12px;padding:12px 16px;border:1.5px dashed var(--accent);border-radius:12px;background:var(--accent-bg)}
+.resume-info{font-size:13.5px;color:var(--ink);display:flex;flex-direction:column;gap:3px}
+.resume-info b{font-size:15px;color:var(--accent)}
+.resume-info span{color:var(--muted);font-size:12.5px}
+.resume-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.seg-row{display:flex;gap:10px;flex-wrap:wrap}
+.ch.hit{color:var(--green);font-weight:600}
+.ch.miss{background:#f6d4d0;color:var(--bad);font-weight:700}
+.ch.mask{color:#c9c2b2;background:#f1ede3;border-radius:3px}
+.r-err .miss-text{flex:1;color:var(--bad);font-weight:700;word-break:break-all;line-height:1.6}
+.p-tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+.p-tip b{color:var(--green)}
+
+/* ============ 选择快刷 ============ */
+.q-combo{flex-shrink:0;font-size:14px;font-weight:800;color:var(--accent);white-space:nowrap;
+  background:var(--accent-bg);border-radius:20px;padding:4px 14px;transition:transform .15s}
+.q-combo:empty{display:none}
+.q-combo.pop{animation:comboPop .25s}
+@keyframes comboPop{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+.q-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:26px 26px 20px;margin-top:16px;box-shadow:0 3px 14px rgba(30,20,5,.05)}
+.q-text{font-size:19px;line-height:2.1;color:var(--ink);word-break:break-all}
+.q-text .q-ctx{color:var(--muted)}
+.q-blank{display:inline;min-width:2.5em;border-bottom:2.5px solid var(--accent);padding:0 .3em;
+  font-weight:700;color:var(--accent);letter-spacing:.05em;transition:color .2s,border-color .2s}
+.q-blank.ok{color:var(--green);border-color:var(--green)}
+.q-blank.no{color:var(--bad);border-color:var(--bad)}
+.q-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.q-choice{text-align:left;font:inherit;font-size:16.5px;line-height:1.5;padding:13px 18px;
+  background:var(--surface);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;
+  color:var(--ink);transition:border-color .15s,background .15s,transform .1s}
+.q-choice:hover:not(:disabled){border-color:var(--accent);background:var(--accent-bg)}
+.q-choice:active:not(:disabled){transform:scale(.98)}
+.q-choice:disabled{cursor:default;opacity:.92}
+.q-choice .qc-idx{display:inline-block;font-size:12px;font-weight:700;color:var(--muted);
+  border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin-right:9px}
+.q-choice.correct{border-color:var(--green);background:#eef5e9;color:var(--green);font-weight:700}
+.q-choice.correct .qc-idx{color:var(--green);border-color:var(--green)}
+.q-choice.wrong{border-color:var(--bad);background:#f9e7e4;color:var(--bad);font-weight:700;
+  animation:shake .3s}
+.q-choice.wrong .qc-idx{color:var(--bad);border-color:var(--bad)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.q-tip{font-size:12.5px;color:var(--muted);margin:16px 0 0;text-align:center}
+.q-result{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:26px;margin-top:16px;text-align:center}
+.q-big{font-size:42px;font-weight:900;color:var(--accent);letter-spacing:1px}
+.q-line{font-size:14px;color:var(--muted);margin:8px 0 14px;white-space:pre-line}
+.q-wrong{text-align:left;font-size:13.5px;line-height:1.8;color:var(--ink);
+  border-top:1px dashed var(--line);padding-top:12px}
+.q-wrong .qw-item{margin-bottom:6px}
+.q-wrong .qw-ans{color:var(--green);font-weight:700}
+.q-btns{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+
+/* ============ 结果浮层 ============ */
+.overlay{position:fixed;inset:0;background:rgba(38,34,27,.48);backdrop-filter:blur(2px);
+  display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.result-card{background:var(--surface);border-radius:18px;padding:26px 30px;max-width:560px;width:100%;
+  box-shadow:0 18px 50px rgba(30,20,5,.3);max-height:88vh;overflow-y:auto}
+.result-card h2{font-size:20px;margin-bottom:4px}
+.result-card .r-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.r-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.r-cell{background:var(--bg);border-radius:10px;padding:10px 6px;text-align:center}
+.r-cell .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.r-cell .k{font-size:11.5px;color:var(--muted)}
+.r-cell.good .v{color:var(--green)} .r-cell.warn .v{color:var(--accent)}
+.r-errs{border:1px solid var(--line);border-radius:10px;max-height:180px;overflow-y:auto;margin-bottom:16px}
+.r-errs .r-err{display:flex;align-items:center;gap:10px;padding:7px 14px;font-size:14px;border-bottom:1px solid var(--line)}
+.r-errs .r-err:last-child{border-bottom:none}
+.r-err .pos{color:var(--muted);font-size:12px;min-width:58px}
+.r-err .exp{color:var(--green);font-weight:700}
+.r-err .arrow{color:var(--muted)}
+.r-err .got{color:var(--bad);font-weight:700;text-decoration:line-through}
+.r-empty{padding:12px 14px;font-size:13px;color:var(--muted)}
+.r-adv{font-size:13px;color:var(--accent);margin-bottom:12px}
+.r-btns{display:flex;gap:10px;flex-wrap:wrap}
+.r-btns .btn{flex:1;justify-content:center;padding:11px 10px;font-size:15px}
+.r-diff{margin-bottom:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rd-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg);
+  font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+.rd-toggle{cursor:pointer;user-select:none;color:var(--accent);font-weight:600}
+.rd-body{max-height:220px;overflow-y:auto;padding:12px 14px}
+.rd-body .rd-label{font-size:11.5px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
+.rd-body .rd-text{font-size:15.5px;line-height:1.95;word-break:break-all;margin-bottom:12px}
+.rd-body .rd-text:last-child{margin-bottom:0}
+.rd-text .hit{color:var(--green);font-weight:600}
+.rd-text .miss{background:#f6d4d0;color:var(--bad);font-weight:700}
+.rd-text .auto{color:var(--muted)}
+.rd-text .mok{color:var(--ink)}
+.rd-text .merr{color:var(--bad);text-decoration:line-through;font-weight:700}
+.rd-empty-line{font-size:13px;color:var(--muted)}
+/* 练习记录页 */
+.rec-total{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.rec-tabs{display:flex;gap:8px;margin-bottom:16px}
+.rec-tabs .seg{flex:0 0 auto}
+.rec-day{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.rec-day-head{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);font-size:13.5px;flex-wrap:wrap}
+.rec-day-head b{font-size:15px}
+.rec-day-head .muted{color:var(--muted)}
+.rec-item{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13.5px;border-top:1px solid var(--line);flex-wrap:wrap}
+.rec-item .ri-name{flex:1;min-width:200px}
+.rec-item .ri-badge{font-size:11px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:10px;white-space:nowrap}
+.rec-item .ri-acc{font-weight:700;min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.rec-item .ri-meta{color:var(--muted);font-size:12px;min-width:150px;text-align:right}
+.acc-good{color:var(--green)} .acc-mid{color:var(--accent)} .acc-bad{color:var(--bad)}
+.rec-topic{margin:20px 0 8px;font-size:15px;font-weight:700}
+.rec-card-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;
+  margin-bottom:6px;font-size:13.5px;flex-wrap:wrap;background:var(--surface)}
+.rec-card-row .ri-name{flex:1;min-width:220px}
+.rec-card-row .lv{color:var(--accent);letter-spacing:1px;min-width:66px}
+.forgot{background:var(--accent-bg);border-color:#ecc7c1!important}
+.forgot .tag-forgot{font-size:11px;color:var(--accent);border:1px solid var(--accent);padding:1px 7px;border-radius:9px;white-space:nowrap}
+.ri-due{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.never{opacity:.62}
+kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;
+  padding:1px 6px;font-size:11.5px;font-family:inherit;color:var(--muted)}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:11px 22px;border-radius:24px;font-size:14px;
+  opacity:0;pointer-events:none;transition:all .25s;z-index:99;max-width:86vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:640px){
+  .r-grid{grid-template-columns:repeat(2,1fr)}
+  .home-head{flex-direction:column;align-items:flex-start}
+  .streak-box{text-align:left}
+  .p-text{line-height:2.05}
+}
+</style>
+<meta name="author" content="恩格 (Engels)">
+</head>
+<body>
+
+<!-- ================= 首页 ================= -->
+<div id="viewHome" class="wrap">
+  <header class="home-head">
+    <div class="brand">
+      <h1>四页纸打字工作台</h1>
+      <p class="sub">2026 法考论述题 · 杜洪波四页纸 · 打字背诵 V4</p>
+    </div>
+    <div class="streak-box">
+      <div class="streak-num" id="streakNum">0</div>
+      <div class="streak-label" id="streakLabel">天 · 还没开始</div>
+    </div>
+  </header>
+
+  <div class="today-strip" id="todayStrip"></div>
+
+  <div class="mode-row">
+    <div class="seg-row">
+      <div class="seg" id="modeSeg">
+        <button data-mode="fw">框架模式</button>
+        <button data-mode="full">全文模式</button>
+      </div>
+      <div class="seg" id="methodSeg">
+        <button data-method="follow">跟打练习</button>
+        <button data-method="recall">默写测试</button>
+        <button data-method="select">选择快刷</button>
+      </div>
+    </div>
+    <div class="hint-row hidden" id="hintRow">
+      <span class="hint-row-label">默写难度</span>
+      <div class="seg" id="hintSeg">
+        <button data-hint="auto">自动（推荐）</button>
+        <button data-hint="kw">关键词</button>
+        <button data-hint="first">首字</button>
+        <button data-hint="blind">全盲</button>
+      </div>
+      <span class="hint-row-note">自动 = 按熟练度阶梯：0–1 露关键词 → 2 露首字 → 3+ 全盲</span>
+    </div>
+    <p class="mode-desc" id="modeDesc"></p>
+    <div class="resume-box hidden" id="resumeBox">
+      <div class="resume-info">
+        <b id="resumeName">练习</b>
+        <span id="resumeInfo"></span>
+      </div>
+      <div class="resume-btns">
+        <button class="btn small" id="btnResumeGo">继续上次练习</button>
+        <button class="btn small ghost" id="btnResumeDrop">放弃，从头开始</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="plan-box hidden" id="planBox">
+    <div class="plan-top">
+      <span class="plan-cd" id="planCd"></span>
+      <span class="plan-date" id="planDate"></span>
+    </div>
+    <div class="plan-task" id="planTask"></div>
+    <div class="plan-foot">
+      <span class="plan-done" id="planDone"></span>
+      <button class="btn primary" id="btnTask">开始今日任务</button>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn primary" id="btnSmart">开始智能练习</button>
+    <button class="btn" id="btnReview">到期复习</button>
+  </div>
+
+  <div class="overall" id="overallBox"></div>
+  <div class="topic-grid" id="topicGrid"></div>
+
+  <details class="howto">
+    <summary>怎么用？</summary>
+    <ol>
+      <li><b>选内容 + 选方式</b>：框架 = 把主题拆成一块一块的小卡（每块含中心句＋「（1）（2）（3）」＋「一方面/另一方面/最后」展开句，逐块细练），每题末尾再给一张「整题框架」串背大卡；全文 = 每个主题<b>只有一张大卡</b>，即整题完整全文（标题＋全部块），一次背下整篇——块级细练归框架、整篇通背归全文。绿色下划线为原版墨绿采分点。跟打 = 照着原文打，默写测试 = 卡片式闭卷，隐藏原文凭记忆写，写完对比、漏打标红。</li>
+      <li><b>标点不判定</b>：默认开启，标点可打可不打、不计分；关闭后需完整正确输入标点。</li>
+      <li><b>今日任务（考前倒排）</b>：设定考试日期（默认 2026-10-18）后，首页显示倒计时和今日任务——到期复习＋按计划的新卡配额；首轮截止考前 8 天，之后转入纯复习冲刺。所有复习间隔自动收口到考试前（超出考试的压到考前 1–4 天），保证每张卡考前都过几遍。</li>
+      <li><b>熟练度在哪看</b>：练习页顶部徽标（★☆☆ 2/5 · 复习安排）、每张卡成绩弹层第一行（熟练度变化＋下次复习）、首页总进度「平均熟练度 ★X.X」与各主题卡的「★X.X」、以及「练习记录与留存 → 卡片留存」里每张卡的星级明细。</li>
+      <li><b>选择快刷（累了就来）</b>：方式选「选择快刷」后点智能练习——<b>只从已学过的卡抽题，跟随学习进度</b>：今天该复习的排最前，巩固中（未满 3 星）的次之，已掌握的垫底；<b>没学过的卡不抽</b>，不会出现没见过的内容。每题挖掉一个采分点，四选一（键盘 <kbd>1-4</kbd> / <kbd>ABCD</kbd>），干扰项是四页纸里其他易混采分点；连击计数，答错自动重做，答对 2 次的题轮换。题目位置标注来源（今日该复习/巩固中/已掌握），结束面板显示本组抽题构成。</li>
+      <li><b>记忆调度（记忆曲线）</b>：正确率 / 覆盖率 ≥95% 熟练度 +1 且复习间隔升一档（1→2→4→7→15→30 天），&lt;85% 掉级并回到 1 天；「到期复习」= 到期/逾期卡片（最欠的排最前）＋ 今天低于 90% 的卡，智能练习也会优先安排到期卡。每张卡的成绩弹层都会标注熟练度变化和下次复习时间。</li>
+      <li><b>默写难度阶梯</b>：提示随熟练度自动减弱——新卡露<b>关键词</b>，熟练度 2 只露<b>首字</b>，3+ <b>全盲</b>；也可在首页手动指定难度。</li>
+      <li><b>成绩回看</b>：每卡成绩弹层内置「原文对照」——原文高亮（绿=命中/打对，红=漏打/打错）＋你的默写原样并列，可收起展开；首页「练习记录与留存」可看每日明细与每卡熟练度，每张卡标注下次复习时间，到期/逾期的标红。</li>
+      <li><b>渐隐跟打</b>：练习页「渐隐档位」选择器可随时切换 全文 / 隐20% / 40% / 60% / 80% / 全盲，点击立即生效并作为后续卡片默认；「再打一遍」按成绩自动升一档（≥85%）。<b>按整词隐藏，绝不藏半个词</b>：「法治」「制度」这样的词要么整词藏、要么整词留。隐藏顺序：<b>采分点（绿色关键词）最先藏——那正是要背出来的</b>，衔接词次之，结构词（第X/（N））全盲才藏；「□」处凭记忆打，打对即亮绿。设置里可开<b>「随机隐藏词」</b>：同一档位每轮随机抽词（都隐 20% 但藏的词不同，防背顺序），采分点不再保底优先，换卡/再打一遍都会换一批；同轮内升档只增不减。<b>卡壳提示</b>：渐隐/全盲时 5 秒没打出来，自动亮出接下来 2 个字（浅蓝虚线标记，不影响正确率；成绩单会统计「卡壳提示」字数，可在设置中关闭）。</li>
+      <li><b>操作</b>：输入框多行自动增高，回车不换行；练习页右上「‹ 上一张 / 下一张 ›」可随时切换卡片（<kbd>Alt+←</kbd> / <kbd>Alt+→</kbd>，切换不计成绩）；默写模式 <kbd>Ctrl+Enter</kbd> 对比原文，<kbd>Esc</kbd> 随时退出并保存断点，首页可「继续上次练习」。</li>
+    </ol>
+  </details>
+
+  <div class="settings">
+    <h3>设置与数据</h3>
+    <div class="row">
+      <label class="switch"><input type="checkbox" id="optSkip"> 标点不判定（可打可不打，推荐）</label>
+    </div>
+    <div class="row">
+      <label class="switch"><input type="checkbox" id="optFiller"> 关联词不判定：词表中的字灰色显示，可打可不打，不计入正确率（推荐）</label>
+      <label class="switch">忽略词表
+        <input type="text" id="fillerWords" style="width:230px;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font:inherit;background:var(--surface);color:var(--ink)">
+        <span class="f-note">顿号或逗号分隔；这些词漏打、多打、换成别的关联词都不计分，主体词仍逐字判定。「一方面/另一方面/最后/同时」等逻辑结构词不在忽略列，需背出。</span>
+      </label>
+      <label class="switch">保护词表
+        <input type="text" id="fillerProtect" style="width:180px;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font:inherit;background:var(--surface);color:var(--ink)">
+        <span class="f-note">关联词字落在这些实词/专名内部时不按关联词处理（如「和平统一」的「和」、「公众参与」的「与」），照常判定、不灰显。</span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="switch"><input type="checkbox" id="optFade"> 渐隐自动升档：「再打一遍」时按成绩自动多隐藏一档（≥85% 升一档）；档位也可在练习页随时手动切换</label>
+      <label class="switch"><input type="checkbox" id="optRandomMask"> 随机隐藏词：同一档位每轮抽不同的词（都隐 20%，藏的词每轮不一样，防背顺序）；开启后采分点不再保底优先，全盲档不受影响</label>
+      <label class="switch"><input type="checkbox" id="optStuck"> 卡壳提示：渐隐/全盲时 5 秒没打出来，自动亮出接下来 2 个字（浅蓝虚线，不影响成绩）</label>
+    </div>
+    <div class="row">
+      <label class="switch">考试日期 <input type="date" id="examDate"> （倒排今日任务与考前冲刺，默认 2026-10-18）</label>
+    </div>
+    <div class="row">
+      <label class="switch">原文字号
+        <span class="seg seg-sm" id="fontSeg">
+          <button data-fs="s">小</button>
+          <button data-fs="m">中</button>
+          <button data-fs="l">大</button>
+        </span>
+        <span class="f-note">小 = 长卡一屏多见几行；大 = 舒适读字。默认中字，超长卡自动用小字；手动选择后以手动为准。跟打与默写原文均生效，练习页顶部也可随时切换。</span>
+      </label>
+    </div>
+    <div class="row">
+      <button class="btn small" id="btnRecords">练习记录与留存</button>
+      <button class="btn small" id="btnExport">导出进度</button>
+      <button class="btn small" id="btnImport">导入进度</button>
+      <button class="btn small" id="btnReset">重置全部进度</button>
+      <input type="file" id="fileImport" accept=".json" hidden>
+    </div>
+    <p class="fine">进度自动保存在本机浏览器（localStorage）。换电脑/换浏览器：旧环境「导出进度」→ 新环境「导入进度」。导入为<b>合并</b>（不覆盖本机记录：每卡取更高进度、每日练习量累加、记录合并去重），可放心把两台电脑的进度并到一起；若想彻底用导入文件替换本机，请先「重置」再导入。</p>
+  </div>
+
+  <footer>内容依据《2026 法考论述题杜洪波四页纸》整理，保留原版墨绿采分点 / 豆沙红助记 / 雾蓝法条分层，仅供个人学习使用。<br>天道酬勤、功不唐捐。<br><span class="sig">✦ 杜洪波私塾班7群 恩格 出品 · V4 ✦</span></footer>
+</div>
+
+<!-- ================= 练习页 ================= -->
+<div id="viewPractice" class="wrap hidden">
+  <div class="p-top">
+    <button class="p-back" id="btnBack">← 返回</button>
+    <div class="p-info">
+      <span class="p-topic" id="pTopic"></span>
+      <span class="p-pos" id="pPos"></span>
+      <span class="badge" id="pBadge"></span>
+      <span class="badge lv-badge" id="pLevel" title="熟练度满 3 为掌握；复习安排见「练习记录与留存」"></span>
+    </div>
+    <div class="p-nav">
+      <button class="p-nav-btn" id="btnPrev" title="上一张（Alt+←）">‹ 上一张</button>
+      <button class="p-nav-btn" id="btnNavNext" title="下一张（Alt+→）">下一张 ›</button>
+    </div>
+  </div>
+  <div class="fade-row hidden" id="fadeRow">
+    <span class="fade-row-label">渐隐档位</span>
+    <div class="seg seg-sm" id="fadeSeg">
+      <button data-fz="0">全文</button>
+      <button data-fz="1">隐20%</button>
+      <button data-fz="2">隐40%</button>
+      <button data-fz="3">隐60%</button>
+      <button data-fz="4">隐80%</button>
+      <button data-fz="5">全盲</button>
+    </div>
+    <span class="fade-row-note" id="fadeNote">整词隐藏：采分点先藏，结构词全盲才藏；点击立即切换，「再打一遍」自动升档</span>
+  </div>
+  <div class="fade-row" id="fsRow">
+    <span class="fade-row-label">原文字号</span>
+    <span class="seg seg-sm" id="fontSeg2">
+      <button data-fs="s">小</button>
+      <button data-fs="m">中</button>
+      <button data-fs="l">大</button>
+    </span>
+    <span class="fade-row-note">跟打与默写均生效；超长卡自动用小字，手动选择后以手动为准</span>
+  </div>
+  <div class="p-progress" id="pBarWrap"><i id="pBar"></i></div>
+  <div class="recall-cover hidden" id="recallCover">
+    <div class="rc-head">
+      <span class="rc-big">默写测试 · 原文已隐藏</span>
+      <span class="rc-level" id="rcLevel"></span>
+    </div>
+    <div class="rc-skel-wrap hidden" id="rcSkelWrap"><div class="rc-skel" id="rcSkel"></div></div>
+    <div class="rc-foot">
+      <span class="rc-sub" id="rcSub"></span>
+      <button class="btn small" id="btnPeek">偷看原文（本卡计为开卷）</button>
+    </div>
+  </div>
+  <div class="p-text-wrap" id="pTextWrap"><div class="p-text" id="pText"></div></div>
+  <div class="p-stats" id="pStats"></div>
+  <div class="p-hints" id="pHints"></div>
+  <div class="p-input-wrap">
+    <textarea id="pInput" rows="3" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="在这里跟打原文…（支持任意中文输入法）"></textarea>
+    <div class="p-actions hidden" id="recallActions">
+      <button class="btn primary" id="btnCompare">对比原文 <kbd>Ctrl+Enter</kbd></button>
+    </div>
+    <p class="p-tip" id="pTip"></p>
+  </div>
+</div>
+
+<!-- ================= 选择快刷页 ================= -->
+<div id="viewSelect" class="wrap hidden">
+  <div class="p-topbar">
+    <button class="p-back" id="btnQuizBack">← 返回</button>
+    <div class="p-info">
+      <span class="p-topic" id="qTopic"></span>
+      <span class="p-pos" id="qPos"></span>
+    </div>
+    <div class="q-combo" id="qCombo"></div>
+  </div>
+  <div class="q-card" id="qCard">
+    <div class="q-text" id="qText"></div>
+    <div class="q-choices" id="qChoices"></div>
+    <p class="q-tip">选出挖空处的正确内容 · 答错会重做一遍</p>
+  </div>
+  <div class="q-result hidden" id="qResult">
+    <div class="q-big" id="qBig"></div>
+    <div class="q-line" id="qLine"></div>
+    <div class="q-wrong" id="qWrong"></div>
+    <div class="q-btns">
+      <button class="btn primary" id="btnQuizAgain">再来一组</button>
+      <button class="btn" id="btnQuizHome">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 练习记录页 ================= -->
+<div id="viewRecords" class="wrap hidden">
+  <div class="p-top">
+    <button class="p-back" id="btnRecBack">← 返回</button>
+    <div class="p-info"><span class="p-topic">练习记录与背诵留存</span></div>
+  </div>
+  <div class="rec-total" id="recTotal"></div>
+  <div class="rec-tabs">
+    <div class="seg" id="recSeg">
+      <button data-rt="days">每日汇总</button>
+      <button data-rt="cards">卡片留存</button>
+    </div>
+  </div>
+  <div id="recBody"></div>
+</div>
+
+<!-- ================= 结果浮层 ================= -->
+<div id="overlay" class="overlay hidden">
+  <div class="result-card" id="resultCard">
+    <h2 id="rTitle">本卡完成</h2>
+    <p class="r-sub" id="rSub"></p>
+    <div class="r-grid" id="rGrid"></div>
+    <div class="r-diff hidden" id="rDiff">
+      <div class="rd-head"><span>原文对照</span><span class="rd-toggle" id="rdToggle">收起</span></div>
+      <div class="rd-body" id="rdBody"></div>
+    </div>
+    <div class="r-errs" id="rErrs"></div>
+    <p class="r-adv hidden" id="rAdv"></p>
+    <div class="r-btns">
+      <button class="btn primary" id="btnNext">下一张 <kbd>Enter</kbd></button>
+      <button class="btn" id="btnRedo">再打一遍</button>
+      <button class="btn" id="btnEnd">结束返回</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= 数据（由 extract_data.py 生成） ================= */
+const DATA = [{"title":"一、习近平法治思想的重大意义","logic":"总结/成果/循/思","blocks":[{"header":"","full":"1.是对党领导法治建设实践和宝贵经验的科学总结。2.是马克思主义法治理论中国化、时代化的最新成果。3.是在法治轨道上全面建设社会主义现代化国家的根本遵循。4.是引领法治中国建设实现高质量发展的思想旗帜。","logic":"","law":"","notes":["（提示：题目出现“习近平法治思想”，就写本段）"],"kws":[{"start":19,"end":23,"text":"科学总结"},{"start":44,"end":48,"text":"最新成果"},{"start":72,"end":76,"text":"根本遵循"},{"start":96,"end":100,"text":"思想旗帜"}]}]},{"title":"二、坚持党对全面依法治国的领导——全面依法治国的根本保证","logic":"三统一（党人法）→管好法（立执司守）→管好自己（制度和机制）","blocks":[{"header":"第一，坚持党的领导、人民当家作主和依法治国有机统一。","full":"第一，坚持党的领导、人民当家作主和依法治国有机统一。（1）党的领导是人民当家作主和依法治国的根本保证；（2）人民当家作主是我国民主政治的本质特征；（3）依法治国是党领导人民治理国家的基本方式。","logic":"","law":"国家安全法15；宪法1第2款","notes":[],"kws":[{"start":5,"end":25,"text":"党的领导、人民当家作主和依法治国有机统一"},{"start":29,"end":33,"text":"党的领导"},{"start":46,"end":50,"text":"根本保证"},{"start":54,"end":60,"text":"人民当家作主"},{"start":76,"end":80,"text":"依法治国"}]},{"header":"第二，坚持党领导立法、保证执法、支持司法和带头守法。","full":"第二，坚持党领导立法、保证执法、支持司法和带头守法。（1）立法的重大问题必须向党中央报告；（2）各级党委要保障执法机关严格执法；（3）各级党委要支持司法机关依法独立行使司法权；（4）各级党委和领导干部要带头依法办事。","logic":"立执司守","law":"立法法3；宪法5第4款","notes":[],"kws":[{"start":8,"end":10,"text":"立法"},{"start":13,"end":15,"text":"执法"},{"start":18,"end":20,"text":"司法"},{"start":21,"end":25,"text":"带头守法"},{"start":59,"end":63,"text":"严格执法"},{"start":78,"end":87,"text":"依法独立行使司法权"},{"start":101,"end":107,"text":"带头依法办事"}]},{"header":"第三，健全党领导法治的制度和工作机制。","full":"第三，健全党领导法治的制度和工作机制。（1）从制度来看，要把党的主张通过法定程序上升为国家法律；（2）从机制来看，既要强化中央全面依法治国委员会的作用，又要强化地方各级党委的主体责任，抓好法治工作的落实。","logic":"宏观制度（立法）＋微观机制（党中央＋各级党委）","law":"","notes":[],"kws":[{"start":11,"end":18,"text":"制度和工作机制"},{"start":30,"end":34,"text":"党的主张"},{"start":80,"end":86,"text":"地方各级党委"}]}]},{"title":"三、坚持以人民为中心——全面依法治国的根本立场","logic":"人民的地位（各种政治制度）→人民的权益（权利＋利益）→人民的体验（公平正义）","blocks":[{"header":"第一，依法保障人民当家作主，实现全过程人民民主。","full":"第一，依法保障人民当家作主，实现全过程人民民主。（1）要完善人民代表大会制度，这是我国的根本政治制度；（2）要完善多党合作和政治协商制度，发挥人民政协的积极作用；（3）要健全基层民主制度，保障人民依法管理基层公共事务。","logic":"民主体现为“人大、政协、基层”","law":"立法法6第1款；宪法2、序言倒数第四段、111","notes":[],"kws":[{"start":16,"end":23,"text":"全过程人民民主"},{"start":44,"end":50,"text":"根本政治制度"},{"start":57,"end":66,"text":"多党合作和政治协商"},{"start":87,"end":91,"text":"基层民主"}]},{"header":"第二，依法保障人民权益。","full":"第二，依法保障人民权益。这是全面依法治国的根本目的。（1）要加强人权的执法和司法保障，依法保障人身权、财产权、人格权、基本政治权利以及经济、社会和文化等基本权利；（2）要维护最广大人民的最根本利益，依法解决法治领域的突出问题。","logic":"保障权利＋维护利益","law":"宪法33第3款、第二章各权利条","notes":[],"kws":[{"start":9,"end":11,"text":"权益"},{"start":35,"end":42,"text":"执法和司法保障"},{"start":43,"end":47,"text":"依法保障"},{"start":76,"end":80,"text":"基本权利"},{"start":93,"end":98,"text":"最根本利益"}]},{"header":"第三，依法保障公平正义，这是法治的生命线，要让人民群众在每一项法律制度/每一个执法决定/每一宗司法案件中都感受到公平正义。","full":"第三，依法保障公平正义，这是法治的生命线，要让人民群众在每一项法律制度/每一个执法决定/每一宗司法案件中都感受到公平正义。（1）把法律面前人人平等贯彻到立法、执法、司法和守法的全过程，实现权利公平、机会公平、规则公平；（2）依法保障妇女、儿童以及残疾人的合法权益。","logic":"公平（平等）＋正义（保护弱者）","law":"立法法6第1款；宪法33第2款、45第3款、48、49第1款","notes":[],"kws":[{"start":7,"end":11,"text":"公平正义"},{"start":17,"end":20,"text":"生命线"},{"start":71,"end":91,"text":"平等贯彻到立法、执法、司法和守法的全过程"},{"start":116,"end":126,"text":"妇女、儿童以及残疾人"}]}]},{"title":"四、坚持中国特色社会主义法治道路——全面依法治国的唯一正确道路","logic":"三件套（党、制度、理论）→法德结合→从实际出发","blocks":[{"header":"第一，坚持法治道路的核心要义。","full":"第一，坚持法治道路的核心要义。（1）坚持党的领导；（2）坚持中国特色社会主义制度。这是法治建设的根本制度基础和制度保障。（3）贯彻中国特色社会主义法治理论。","logic":"","law":"宪法1第2款；宪法2、6第2款（供展开）","notes":["（见前“党的领导”）","（见前“习近平法治思想的意义”）","具体可以从“公有制为主体”的经济制度、“人民代表大会”等政治制度展开"],"kws":[{"start":38,"end":40,"text":"制度"},{"start":48,"end":59,"text":"根本制度基础和制度保障"},{"start":73,"end":77,"text":"法治理论"}]},{"header":"第二，坚持依法治国与以德治国相结合。","full":"第二，坚持依法治国与以德治国相结合。法律是成文的道德，道德是内心的法律。（1）要用法治手段解决道德领域突出问题。一方面，要加强立法，明确对失德行为的惩戒；另一方面，加大执法司法力度，严惩见利忘义等违法行为；最后，要完善守法的褒奖机制和违法失信的惩戒机制。（2）要强化道德对法治的支撑作用。一方面，重视道德的教化作用，为法治创造良好的人文环境；另一方面，在道德体系中体现法治要求，实现道德体系与法律体系的衔接协调；最后，把社会主义核心价值观融入到法治的各个环节。","logic":"法对道德--立执司守；道德对法--先衔接、再融入","law":"立法法8；宪法24","notes":[],"kws":[{"start":5,"end":14,"text":"依法治国与以德治国"},{"start":45,"end":47,"text":"解决"},{"start":51,"end":53,"text":"突出"},{"start":63,"end":65,"text":"立法"},{"start":69,"end":73,"text":"失德行为"},{"start":84,"end":88,"text":"执法司法"},{"start":109,"end":111,"text":"守法"},{"start":139,"end":141,"text":"支撑"},{"start":153,"end":155,"text":"教化"},{"start":191,"end":200,"text":"道德体系与法律体系"},{"start":210,"end":219,"text":"社会主义核心价值观"}]},{"header":"第三，坚持从我国实际出发。","full":"第三，坚持从我国实际出发。（1）要从我国国情出发，突出中国特色；（2）要传承中华法律文化精华；（3）要学习借鉴世界上优秀的法治文明成果。","logic":"古今中外","law":"","notes":[],"kws":[]}]},{"title":"五、坚持依宪治国、依宪执政——全面依法治国的首要任务","logic":"用起来（贯彻实施）→管起来（监督解释）→讲出去（宣传教育）","blocks":[{"header":"第一，全面贯彻实施宪法。","full":"第一，全面贯彻实施宪法。（1）全面贯彻宪法规定、原则和精神；（2）健全相关制度，保证宪法得到全面实施，同时，还要建立宪法实施情况报告制度。","logic":"贯彻（规定、原则、精神）＋实施（配套制度）","law":"宪法序言末段；全国人民代表大会组织法39","notes":[],"kws":[{"start":5,"end":9,"text":"贯彻实施"}]},{"header":"第二，完善宪法监督工作。","full":"第二，完善宪法监督工作。这要求：（1）全国人大及其常委会和有关监督机关要担负起宪法法律监督职责；（2）加强宪法解释工作，积极回应涉宪问题。","logic":"既要把宪法“保护好”，又要把宪法“解释好”","law":"宪法62第（二）项、67第（一）项；全国人民代表大会组织法39","notes":[],"kws":[{"start":19,"end":28,"text":"全国人大及其常委会"},{"start":53,"end":57,"text":"宪法解释"}]},{"header":"第三，深入开展宪法宣传教育。","full":"第三，深入开展宪法宣传教育。这要求：（1）在全社会开展宪法宣传教育，使人民群众认识到宪法是保障公民权利的法律武器；（2）坚持从青少年抓起，把宪法法律教育纳入国民教育体系；（3）抓住领导干部关键少数。","logic":"教育全社会＋重点抓青少年和领导干部","law":"全国人民代表大会组织法39第1款；全国人大常委会关于实行宪法宣誓制度的决定","notes":[],"kws":[{"start":9,"end":13,"text":"宣传教育"},{"start":29,"end":33,"text":"宣传教育"},{"start":39,"end":42,"text":"认识到"},{"start":78,"end":84,"text":"国民教育体系"},{"start":90,"end":94,"text":"领导干部"}]}]},{"title":"六、坚持在法治轨道上全面建设社会主义现代化国家——全面依法治国的时代使命","logic":"一个总关系（改革与法治）＋三个专项（治军、统一、治网）","blocks":[{"header":"第一，要坚持改革与法治同步推进。","full":"第一，要坚持改革与法治同步推进。（1）在法治下推进改革。一方面，对于比较成熟的改革经验，要尽快上升为法律；另一方面，对于经验不成熟的情况，可以进行授权立法；最后，对于不适应改革要求的立法，要及时修改或废止。（2）在改革中完善法治。一方面，要坚定不移地推进法治改革，完善法治体系；另一方面，要把握法治改革的底线，不能对标西方法治体系。","logic":"成熟入法、不成熟授权、不适应废止；改体系、守底线","law":"立法法9、14、16","notes":[],"kws":[{"start":34,"end":38,"text":"比较成熟"},{"start":60,"end":65,"text":"经验不成熟"},{"start":83,"end":90,"text":"不适应改革要求"},{"start":132,"end":138,"text":"完善法治体系"},{"start":147,"end":154,"text":"法治改革的底线"}]},{"header":"第二，坚持依法治军、从严治军。","full":"第二，坚持依法治军、从严治军。一方面要坚持党对军队的绝对领导，另一方面要完善中国特色军事法治体系。","logic":"党指挥枪＋法治保障","law":"","notes":[],"kws":[{"start":5,"end":14,"text":"依法治军、从严治军"}]},{"header":"第三，依法保障“一国两制”与祖国统一。","full":"第三，依法保障“一国两制”与祖国统一。“一国两制”是党领导人民实现祖国和平统一的重要制度，要善于运用法治思维和法治方式推进治理工作。","logic":"一国两制是制度，推进靠法治思维方式","law":"","notes":[],"kws":[{"start":7,"end":18,"text":"“一国两制”与祖国统一"}]},{"header":"第四，坚持依法治网。","full":"第四，坚持依法治网。（1）加快制定完善互联网领域法律法规；（2）加强执法和司法，依法打击网络违法犯罪行为；（3）加强法治宣传教育。","logic":"治理网络也需要“立法”和“执法、司法、守法”","law":"","notes":[],"kws":[{"start":5,"end":9,"text":"依法治网"},{"start":15,"end":19,"text":"制定完善"},{"start":34,"end":39,"text":"执法和司法"}]}]},{"title":"七、坚持建设中国特色社会主义法治体系——全面依法治国的总抓手","logic":"先有→再用→需要盯着→需要专业的人来用→需要党内法规管好党","blocks":[{"header":"第一，加快形成完备的法律规范体系。","full":"第一，加快形成完备的法律规范体系。（1）完善以宪法为核心的中国特色社会主义法律体系，坚持立法先行，发挥立法的引领和推动作用；（2）推进科学立法、民主立法和依法立法，提高立法质量；（3）加强国家安全、科技创新、生态文明等重要领域立法。","logic":"要立→怎么立→立哪些","law":"立法法1、55、56","notes":[],"kws":[{"start":44,"end":48,"text":"立法先行"},{"start":67,"end":81,"text":"科学立法、民主立法和依法立法"},{"start":94,"end":113,"text":"国家安全、科技创新、生态文明等重要领域"}]},{"header":"第二，建设高效的法治实施体系。","full":"第二，建设高效的法治实施体系。（1）推进执法体制改革。即要推进综合执法，完善执法程序，严格执法责任，建立权责统一、权威高效的执法体制；（2）推进司法体制改革。完善司法管理体制和权力运行机制，完善司法程序，强化司法责任，建立实现公平正义的司法体制；（3）把全民普法和守法作为长期基础工作，加强法治宣传教育。","logic":"实施包括：执法（权限＋程序＋责任→体制）＋司法（权限＋程序＋责任→体制）＋守法","law":"行政处罚法18；人民法院组织法8","notes":[],"kws":[{"start":20,"end":24,"text":"执法体制"},{"start":72,"end":76,"text":"司法体制"},{"start":127,"end":134,"text":"全民普法和守法"}]},{"header":"第三，建设严密的法治监督体系。","full":"第三，建设严密的法治监督体系。（1）加强党对法治监督的统一领导，把法治监督作为重要工作；（2）加强国家监督、民主监督、群众监督和舆论监督，形成监督合力；（3）健全立法监督工作机制，完善立法监督程序；（4）健全执法司法监督工作机制；（5）拓宽人民监督公权力的渠道。","logic":"党领导、建体系、监督立、执司","law":"各级人民代表大会常务委员会监督法5—6；宪法41","notes":[],"kws":[{"start":20,"end":31,"text":"党对法治监督的统一领导"},{"start":49,"end":68,"text":"国家监督、民主监督、群众监督和舆论监督"},{"start":81,"end":85,"text":"立法监督"},{"start":104,"end":114,"text":"执法司法监督工作机制"},{"start":120,"end":130,"text":"人民监督公权力的渠道"}]},{"header":"第四，建设有力的法治保障体系。","full":"第四，建设有力的法治保障体系。（1）各级党委要加强对依法治国的领导；（2）提高法治工作队伍政治素质、业务能力和道德水准，建设德才兼备的法治工作队伍；（3）运用现代科技手段，全面建设智慧法治。","logic":"党保着方向＋专业人保落实＋科技狠活","law":"","notes":[],"kws":[{"start":18,"end":22,"text":"各级党委"},{"start":39,"end":45,"text":"法治工作队伍"},{"start":62,"end":66,"text":"德才兼备"},{"start":90,"end":94,"text":"智慧法治"}]},{"header":"第五，建设完善的党内法规体系。","full":"第五，建设完善的党内法规体系。（1）完善党的自身建设法规，加强党的政治建设、思想建设以及组织建设等；（2）完善党的组织法规，规范各级党组织的产生和职责；（3）完善党的领导法规，加强党对各方面工作的领导；（4）完善党的监督保障法规，规范对党组织以及党员的监督、考核等。","logic":"自身→组织→领导→监督","law":"","notes":[],"kws":[{"start":22,"end":26,"text":"自身建设"},{"start":57,"end":61,"text":"组织法规"},{"start":81,"end":87,"text":"党的领导法规"},{"start":108,"end":112,"text":"监督保障"}]}]},{"title":"八、坚持依法治国、依法执政、依法行政共同推进，法治国家、法治政府、法治社会一体建设——全面依法治国的工作布局","logic":"法治国家＝目标，法治政府＝主体，法治社会＝基础","blocks":[{"header":"第一，法治国家是法治建设的目标。","full":"第一，法治国家是法治建设的目标。这是建设社会主义现代化国家的重要目标。","logic":"","law":"宪法5第1款","notes":[],"kws":[]},{"header":"第二，法治政府是建设法治国家的主体。","full":"第二，法治政府是建设法治国家的主体。必须率先突破，构建职责明确、依法行政的政府体系。这就要求：（1）用法治给行政权力定规矩。即推进机构、权限、程序和责任法定化；（2）用法治规范政府和市场的边界。即要加快转变政府职能，推动形成全国统一、公平竞争的市场经济体系；（3）加强对政府内部权力制约。既要强化内部流程控制，又要完善政府内部层级监督和专门监督；（4）全面推进政务公开，以公开为原则，以不公开为例外；（5）构建行政调解、行政裁决、行政复议、行政诉讼有机衔接的纠纷解决机制。","logic":"各种制约：用法治（主体、权限、程序和责任）＋用经济（转变职能）＋用监督（内部和外部公开）；这样才能→更好解决纠纷","law":"地方政府组织法62；政府信息公开条例5；行政复议法1","notes":[],"kws":[{"start":50,"end":53,"text":"用法治"},{"start":65,"end":76,"text":"机构、权限、程序和责任"},{"start":101,"end":107,"text":"转变政府职能"},{"start":135,"end":141,"text":"政府内部权力"},{"start":180,"end":184,"text":"政务公开"},{"start":229,"end":235,"text":"纠纷解决机制"}]},{"header":"第三，法治社会是构筑法治国家的基础，全面依法治国需要全社会共同参与。","full":"第三，法治社会是构筑法治国家的基础，全面依法治国需要全社会共同参与。（1）在全社会树立法律权威，使人民认识到法律既是保障自身权利的武器，也是必须遵守的行为规范；（2）推进多层次多领域依法治理。要提高社会治理法治化水平，培育社会成员依法办事的良好环境；（3）法治建设既要抓末端、治已病，更要抓前端、治未病。既要推动更多法治力量向引导和疏导端用力，完善预防性法律制度，又要构建多元纠纷解决机制；（4）加强法治乡村建设，健全自治、德治、法治相结合的乡村治理体系。","logic":"权威、多次、到乡村、治病","law":"","notes":[],"kws":[{"start":26,"end":33,"text":"全社会共同参与"},{"start":41,"end":47,"text":"树立法律权威"},{"start":85,"end":91,"text":"多层次多领域"},{"start":99,"end":106,"text":"社会治理法治化"},{"start":138,"end":141,"text":"治已病"},{"start":148,"end":151,"text":"治未病"},{"start":163,"end":169,"text":"引导和疏导端"},{"start":200,"end":204,"text":"法治乡村"},{"start":209,"end":217,"text":"自治、德治、法治"}]}]},{"title":"九、坚持全面推进科学立法、严格执法、公正司法、全民守法——全面依法治国的重要环节","logic":"立（科学）→执（严格）→司（公正）→守（全民）","blocks":[{"header":"第一，推进科学立法。","full":"第一，推进科学立法。（1）坚持依法立法。要遵循立法程序，严守立法权限；（2）坚持民主立法。一方面，要发挥人大及其常委会在立法中的主导作用；另一方面，要完善立法起草、审议、表决等程序；最后，要扩大公众有序参与。（3）坚持科学立法。一方面，要从实际出发，提高立法的针对性和可行性；另一方面，要加强立法规划，突出立法重点，解决好人民群众普遍关心的问题。","logic":"依法（程序权限）、民主（人大主导＋程序＋公众）、科学（针对可行＋规划）","law":"立法法5—7、56","notes":[],"kws":[{"start":23,"end":34,"text":"立法程序，严守立法权限"},{"start":64,"end":66,"text":"主导"},{"start":88,"end":90,"text":"程序"},{"start":97,"end":99,"text":"公众"},{"start":130,"end":137,"text":"针对性和可行性"},{"start":153,"end":157,"text":"立法重点"},{"start":165,"end":169,"text":"普遍关心"}]},{"header":"第二，推进严格执法。","full":"第二，推进严格执法。重点在于实现严格规范公正文明执法。（1）强调严格执法，对违法行为把握严格的办案尺度；（2）强调规范执法，要深化行政执法体制改革。一方面，要严格实行执法人员持证上岗和资格管理制度，另一方面，要整合行政执法队伍，推动执法重心下移。同时，还要完善行政执法程序，明确执法流程；最后，要严格落实行政执法责任制。（3）强调公正执法，要充分考虑相对人的切身感受，推行人性化执法、柔性执法；（4）强调文明执法，避免暴力执法、过激执法；（5）要加强行政执法与刑事司法有机衔接，克服有案不移、有案难移等现象。","logic":"严格＋规范（主体、权限、程序、责任）＋公正＋文明＋行刑衔接","law":"行政处罚法42、24、27","notes":[],"kws":[{"start":16,"end":26,"text":"严格规范公正文明执法"},{"start":32,"end":36,"text":"严格执法"},{"start":57,"end":61,"text":"规范执法"},{"start":87,"end":96,"text":"持证上岗和资格管理"},{"start":107,"end":113,"text":"行政执法队伍"},{"start":165,"end":169,"text":"公正执法"},{"start":202,"end":206,"text":"文明执法"},{"start":234,"end":238,"text":"有机衔接"}]},{"header":"第三，推进公正司法。","full":"第三，推进公正司法。（1）建立符合职业特点的司法人员管理制度，增强司法人员的职业荣誉感；（2）深化司法体制综合配套改革，规范司法权限和程序，落实司法责任制；（3）强化对司法活动的制约监督。一方面要落实国家和社会监督，形成监督合力；另一方面要强化检察监督，推进检察队伍职业化建设。（4）拓展公益诉讼范围，建立民事公益诉讼惩罚性赔偿制度。","logic":"主体＋权限、程序、责任＋监督＋公益诉讼","law":"人民法院组织法8、9、11；人民检察院组织法20第（四）至（七）项","notes":[],"kws":[{"start":22,"end":26,"text":"司法人员"},{"start":53,"end":57,"text":"综合配套"},{"start":89,"end":93,"text":"制约监督"},{"start":122,"end":126,"text":"检察监督"},{"start":144,"end":148,"text":"公益诉讼"}]},{"header":"第四，推进全民守法。","full":"第四，推进全民守法。（1）把推进全民守法作为基础工程，全面落实“谁执法谁普法”的普法责任制；（2）突出普法重点内容，努力在增强普法的实效性上下功夫；（3）要求企业家依法经营，做诚信守法的表率。","logic":"谁来普＋普什么＋经济普法","law":"","notes":[],"kws":[{"start":14,"end":20,"text":"推进全民守法"},{"start":31,"end":39,"text":"“谁执法谁普法”"},{"start":51,"end":55,"text":"普法重点"},{"start":66,"end":69,"text":"实效性"}]}]},{"title":"十、坚持统筹推进国内法治和涉外法治——全面依法治国的迫切任务","logic":"定布局→搞合作→护好共同体","blocks":[{"header":"第一，加快涉外法治工作战略布局，推进国际法治领域合作，推进我国法域外适用的法律体系建设。","full":"第一，加快涉外法治工作战略布局，推进国际法治领域合作，推进我国法域外适用的法律体系建设。","logic":"","law":"","notes":[],"kws":[]},{"header":"第二，加强对外法治交流工作，深化执法司法交流合作。","full":"第二，加强对外法治交流工作，深化执法司法交流合作。","logic":"","law":"监察法58","notes":[],"kws":[]},{"header":"第三，为构建人类命运共同体提供法治保障，坚定维护联合国权威和地位。","full":"第三，为构建人类命运共同体提供法治保障，坚定维护联合国权威和地位。","logic":"","law":"宪法序言倒数第二段","notes":[],"kws":[]}]},{"title":"十一、坚持建设德才兼备的高素质法治工作队伍——全面依法治国的基础保障","logic":"专门队伍→服务队伍→人才队伍","blocks":[{"header":"第一，加强法治专门队伍建设。","full":"第一，加强法治专门队伍建设。（1）把政治标准放在首位，并把强化公正廉洁的职业道德作为必修课；（2）从符合条件的律师、法学专家中招录立法工作者、法官、检察官和行政复议人员；（3）立法、执法、司法部门干部和人才要进行常态化交流；（4）要健全符合法律职业特点的人员管理和职业保障制度。","logic":"专门队伍，当然要“有道德、有圈子、受保护”","law":"法官法12、15、7（检察官法同号条同）","notes":[],"kws":[{"start":18,"end":22,"text":"政治标准"},{"start":31,"end":35,"text":"公正廉洁"},{"start":63,"end":65,"text":"招录"},{"start":106,"end":111,"text":"常态化交流"},{"start":132,"end":138,"text":"职业保障制度"}]},{"header":"第二，加强法律服务队伍建设。","full":"第二，加强法律服务队伍建设。（1）拥护党的领导、拥护社会主义法治是从业的基本要求；（2）加强律师队伍建设，一方面，要完善社会律师、公职律师和公司律师的人员结构；另一方面，要完善律师执业保障机制，依法保障律师权利；最后，要加强律师事务所管理，发挥律师协会的自律作用。（3）优化公共法律服务队伍结构，稳步增加律师、公证员、仲裁员、人民调解员数量；（4）鼓励社会力量参与公共法律服务，加强法律服务志愿者队伍建设。","logic":"拥护党法＋收钱的队伍（律师＋公证员等）＋不收钱的队伍（志愿者）","law":"律师法3、23、37、43","notes":[],"kws":[{"start":19,"end":23,"text":"党的领导"},{"start":26,"end":32,"text":"社会主义法治"},{"start":46,"end":52,"text":"律师队伍建设"},{"start":88,"end":94,"text":"律师执业保障"},{"start":137,"end":145,"text":"公共法律服务队伍"},{"start":168,"end":170,"text":"数量"},{"start":176,"end":182,"text":"社会力量参与"},{"start":195,"end":198,"text":"志愿者"}]},{"header":"第三，加强法治人才培养。","full":"第三，加强法治人才培养。（1）坚持立德树人、德法兼修；（2）强化法治的基础问题研究，为法治建设提供理论支撑；（3）强化法学教育实践，加强法学教育人员和实务工作者的交流。","logic":"德+才（理论＋实践）","law":"","notes":[],"kws":[{"start":17,"end":26,"text":"立德树人、德法兼修"},{"start":35,"end":39,"text":"基础问题"},{"start":49,"end":53,"text":"理论支撑"},{"start":63,"end":65,"text":"实践"},{"start":75,"end":83,"text":"实务工作者的交流"}]}]},{"title":"十二、坚持抓住领导干部这个“关键少数”——全面依法治国的关键所在","logic":"带好头（模范）→负好责（第一责任人）→提能力（法治思维）","blocks":[{"header":"第一，领导干部应做尊法学法守法用法的模范。","full":"第一，领导干部应做尊法学法守法用法的模范。（1）尊崇法治、敬畏法律，是领导干部必备的基本素质；（2）加强对领导干部带头守法的制度保障。","logic":"领导干部要带好头，首先要有素质＋有保障","law":"公务员法14；国务院组织法18","notes":[],"kws":[{"start":42,"end":46,"text":"基本素质"},{"start":62,"end":66,"text":"制度保障"}]},{"header":"第二，党政主要负责人是推进法治建设第一责任人。","full":"第二，党政主要负责人是推进法治建设第一责任人。（1）坚持党对法治建设的领导，发挥其领导核心作用；（2）领导干部是法治建设的重要组织者、推动者和实践者；（3）加强制度建设，保障领导干部履行其第一责任的职责。","logic":"负责人当然要：心中有党＋干实事＋有保障","law":"国务院组织法18；监察法11","notes":[],"kws":[{"start":99,"end":101,"text":"职责"}]},{"header":"第三，领导干部要提高法治思维和依法办事能力。","full":"第三，领导干部要提高法治思维和依法办事能力。（1）要守法律、重程序、讲规矩，带头营造依法办事环境；（2）要加强对权力运行的制约监督，并把法治素养和依法履职情况纳入考核标准；（3）要坚持以人民为中心，牢记法治真谛是保障人民权益。","logic":"守法律＋控权＋保民","law":"公务员法14；宪法27；监察法15","notes":[],"kws":[{"start":26,"end":37,"text":"守法律、重程序、讲规矩"},{"start":56,"end":65,"text":"权力运行的制约监督"},{"start":92,"end":98,"text":"以人民为中心"}]}]},{"title":"十三、坚持依法治国和依规治党的有机统一——全面依法治国的内在要求","logic":"法和规要互补→强调规→法和规再贯通","blocks":[{"header":"第一，要发挥依法治国和依规治党的互补作用。","full":"第一，要发挥依法治国和依规治党的互补作用。（1）党既要遵守宪法法律，又要遵守党内法规。一方面，要坚持依规治党，完善党内法规体系；另一方面，要坚持依法执政，把党总揽全局、协调各方与各机关依法履职相统一。（2）处理好党内法规同国家法律的关系。即统筹推进党内法规和国家法律的制定实施工作，实现二者衔接协调；（3）处理好党的政策和国家法律的关系。党的政策是法律的指引，是立法的依据和执法司法的指导。","logic":"守法守规→法与规相衔接","law":"宪法5第4—5款","notes":[],"kws":[{"start":16,"end":18,"text":"互补"},{"start":29,"end":33,"text":"宪法法律"},{"start":38,"end":42,"text":"党内法规"},{"start":50,"end":54,"text":"依规治党"},{"start":72,"end":76,"text":"依法执政"},{"start":106,"end":115,"text":"党内法规同国家法律"},{"start":124,"end":133,"text":"党内法规和国家法律"},{"start":156,"end":165,"text":"党的政策和国家法律"},{"start":177,"end":179,"text":"指引"},{"start":192,"end":194,"text":"指导"}]},{"header":"第二，坚持把依规治党作为治党管党的基本方式。","full":"第二，坚持把依规治党作为治党管党的基本方式。（1）加强党内法规宣传教育，增强党员干部的法规意识；（2）加大党内法规执行力度，纠正随意变通、无视制度等乱象；（3）各级党组织和党员干部要按照党章和各项规定办事，更好地发挥党的领导作用；（4）健全问责机制，完善问责主体、权限、程序、内容等方面的制度。","logic":"学→执→守；守不好要问责","law":"监察法6","notes":[],"kws":[{"start":6,"end":10,"text":"依规治党"},{"start":31,"end":35,"text":"宣传教育"},{"start":53,"end":61,"text":"党内法规执行力度"},{"start":93,"end":100,"text":"党章和各项规定"},{"start":120,"end":124,"text":"问责机制"}]},{"header":"第三，推进执法执纪贯通。","full":"第三，推进执法执纪贯通。（1）坚持纪严于法、纪在法前，把党的纪律挺在前面，用纪律管住大多数；（2）要统筹“执法执纪”两把尺子，推进执纪监督和监察监督一体化建设。","logic":"纪在法前，统筹纪法","law":"监察法4第2款；公职人员政务处分法4","notes":[],"kws":[{"start":9,"end":11,"text":"贯通"},{"start":27,"end":36,"text":"把党的纪律挺在前面"},{"start":53,"end":57,"text":"执法执纪"}]}]},{"title":"十四、充分发挥法治对经济社会发展的保障作用","logic":"五位一体：经济、政治、文化、社会、生态，每段都看“法治保什么”","blocks":[{"header":"第一，以法治保障经济发展。","full":"第一，以法治保障经济发展。","logic":"","law":"宪法15","notes":["（略：套用立执司守即可）"],"kws":[]},{"header":"第二，以法治保障政治稳定。","full":"第二，以法治保障政治稳定。（1）要依法保障党的领导地位；（2）要依法保障人民当家作主；（3）依法维护国家政治安全。","logic":"党→人→国","law":"国家安全法15","notes":[],"kws":[{"start":36,"end":42,"text":"人民当家作主"},{"start":50,"end":52,"text":"国家"}]},{"header":"第三，以法治保障文化繁荣。","full":"第三，以法治保障文化繁荣。（1）用社会主义核心价值观引领文化立法；（2）推进社会主义文化强国建设，用法治保障人民文化权益。","logic":"好的文化＋合法的文化","law":"国家安全法23；立法法8","notes":[],"kws":[{"start":21,"end":26,"text":"核心价值观"},{"start":42,"end":46,"text":"文化强国"},{"start":49,"end":54,"text":"用法治保障"}]},{"header":"第四，以法治保障社会和谐。","full":"第四，以法治保障社会和谐。（1）法治是保障和改善民生的制度基石，要加强民生法治保障；（2）注重法治社会建设，扩大公共服务，促进社会公平正义；（3）要坚持和完善共建共治共享的社会治理制度，完善党委领导、政府负责，社会协同、公众参与、法治保障的社会治理体制。","logic":"生活好＋服务好→才能共享","law":"宪法14第4款、45；国家安全法29","notes":[],"kws":[{"start":24,"end":27,"text":"民生的"},{"start":54,"end":60,"text":"扩大公共服务"},{"start":105,"end":114,"text":"社会协同、公众参与"}]},{"header":"第五，以法治保障生态良好。","full":"第五，以法治保障生态良好。（1）要以最严格的制度，最严密的法治，对生态环境予以最严格的保护，对破坏生态环境的行为予以最严厉的制裁；（2）要加大生态环境保护执法司法力度，大幅提高破坏环境违法犯罪成本，强化各类环境保护责任主体的法律责任。","logic":"立执司三大环节的严打","law":"宪法26","notes":[],"kws":[{"start":18,"end":24,"text":"最严格的制度"},{"start":77,"end":83,"text":"执法司法力度"}]}]},{"title":"十五、处理好政治和法治的关系","logic":"三统一之下五件事→党法关系两点","blocks":[{"header":"第一，坚持党的领导、人民当家作主和依法治国有机统一。","full":"第一，坚持党的领导、人民当家作主和依法治国有机统一。（1）政法战线要坚持党的绝对领导，以保障正确的政治方向；（2）维护国家安全，防范和化解重大安全风险；（3）维护社会稳定，坚持和发展新时代枫桥经验，正确处理人民内部矛盾；（4）坚持以人民为中心，保障社会公平正义，实现党的宗旨和目标；（5）以高水平的安全保障高质量的发展，依法维护社会主义市场经济秩序。","logic":"党、国、社会、人","law":"国家安全法15、19、29、8；宪法5第2款","notes":[],"kws":[{"start":64,"end":75,"text":"防范和化解重大安全风险"},{"start":99,"end":109,"text":"正确处理人民内部矛盾"},{"start":126,"end":130,"text":"公平正义"},{"start":164,"end":174,"text":"社会主义市场经济秩序"}]},{"header":"第二，正确处理党的政策和国家法律的关系。","full":"第二，正确处理党的政策和国家法律的关系。","logic":"","law":"","notes":["（略，见前“十三”）"],"kws":[]}]},{"title":"十六、处理好发展与安全的关系","logic":"先讲关系（安全是前提、发展是保障）→再讲建设（体系与能力）","blocks":[{"header":"第一，安全是发展的前提，发展是安全的保障。","full":"第一，安全是发展的前提，发展是安全的保障。（1）从发展角度看，要坚持以经济建设为中心，更好地解放和发展生产力；（2）从安全角度看，要维护社会稳定和安全，必须依靠法治保障，发挥法治的引领和规范作用。","logic":"发展靠生产、安全靠法治","law":"国家安全法8第1款、7","notes":[],"kws":[{"start":9,"end":11,"text":"前提"},{"start":18,"end":20,"text":"保障"},{"start":35,"end":39,"text":"经济建设"},{"start":68,"end":75,"text":"社会稳定和安全"}]},{"header":"第二，要推进国家安全体系和能力建设。","full":"第二，要推进国家安全体系和能力建设。（1）要完善国家安全法治体系、政策体系等；（2）强化国家安全教育，筑牢人民防线；（3）要加强重点领域的国家安全建设；（4）要提高公共安全的治理水平，完善社会治理体系。","logic":"建体系搞教育，抓住重点搞治理","law":"国家安全法3、70、76、29","notes":[],"kws":[{"start":6,"end":10,"text":"国家安全"},{"start":28,"end":32,"text":"法治体系"},{"start":44,"end":50,"text":"国家安全教育"},{"start":64,"end":68,"text":"重点领域"},{"start":87,"end":91,"text":"治理水平"}]}]}];
+
+/* ================= 常量与工具 ================= */
+const VERSION = '4.0';
+const LS_KEY = 'faka26_typing_v1';
+const PUNCT = new Set('，。；：、！？…—·“”‘’《》（）〈〉,.!?;:()"/'.split(''));
+/* 关联词不判定（v3.3）：词表可在设置里编辑；从「待判定字序列」和「输入」两侧同步剔除，
+   逐字位置对照不受影响——关联词打不打、打成什么都不计分。
+   保护词表（v3.3.1）：关联词字若落在实词/专名内部（「和平统一」的「和」、「公众参与」的「与」），
+   不按关联词处理——剔除关联词不能吃掉需要逐字背的实词 */
+const FILLER_DEFAULT = '以及、或者、或是、或、并且、并、而且、而、之、这、那、和、与';
+const FILLER_OLD_DEFAULT = '以及、或、这、那、和、并、及其'; /* 旧默认表，仅用于自动迁移，见下方 */
+const FILLER_OLD2_DEFAULT = '以及、及其、或者、或是、或、并且、并、而且、而、和、与、及、之、这、那'; /* v3.3 中期默认表，仅用于迁移 */
+const FILLER_PROTECT_DEFAULT = '和平、和谐、参与';
+function splitWords(v) {
+  return String(v).split(/[、,，\s]+/).filter(function (w) { return w.length > 0; })
+    .sort(function (a, b) { return b.length - a.length; });
+}
+function fillerWords() { return splitWords(store.settings.fillerWords || FILLER_DEFAULT); }
+function protectWords() { return splitWords(store.settings.fillerProtect || FILLER_PROTECT_DEFAULT); }
+function wordsRe(ws) {
+  if (!ws.length) return null;
+  return new RegExp(ws.map(function (w) {
+    return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }).join('|'), 'g');
+}
+function fillerRe() { return wordsRe(fillerWords()); }
+function activeFillerRe() { return store.settings.fillerOn ? fillerRe() : null; }
+/* 关联词命中位置（落在保护词内部的命中作废）：返回 str 中应忽略的字符下标集合 */
+function fillerSkipSet(str) {
+  const out = new Set();
+  const re = activeFillerRe();
+  if (!re) return out;
+  const prot = [];
+  const pre = wordsRe(protectWords());
+  if (pre) {
+    let pm;
+    while ((pm = pre.exec(str))) { prot.push([pm.index, pm.index + pm[0].length]); if (pm.index === pre.lastIndex) pre.lastIndex++; }
+  }
+  let m;
+  while ((m = re.exec(str))) {
+    let blocked = false;
+    for (let k = 0; k < prot.length; k++) {
+      if (m.index < prot[k][1] && prot[k][0] < m.index + m[0].length) { blocked = true; break; }
+    }
+    if (!blocked) for (let i = m.index; i < m.index + m[0].length; i++) out.add(i);
+    if (m.index === re.lastIndex) re.lastIndex++;
+  }
+  return out;
+}
+function fillerMask(target) { return fillerSkipSet(target); }
+function modeDescText(mode, method, hintPref) {
+  const range = mode === 'fw' ? '块卡完整内容' : '整块内容';
+  if (method === 'select') {
+    return '选择快刷：只从你已学过的卡里抽题（跟随学习进度）——今天该复习的排最前，巩固中（未满 3 星）的次之，已掌握的垫底；没学过的卡不会出现，不会考你没见过的内容。每题挖掉一个采分点四选一（键盘 1-4 / ABCD），答错自动重做，连击有惊喜。';
+  }
+  if (method === 'recall') {
+    if (hintPref === 'kw') return '卡片测试 · 关键词提示：原文只露出墨绿采分点与结构词，「·」处凭记忆补全' + range + '。';
+    if (hintPref === 'first') return '卡片测试 · 首字提示：每个句子只露出第一个字，其余凭记忆默写' + range + '。';
+    if (hintPref === 'blind') return '卡片测试 · 全盲：原文完全隐藏，凭记忆默写' + range + '，写完对比、漏打标红。';
+    return '卡片测试 · 难度自适应：' + range + '——新卡露关键词，熟练度 2 只露首字，3+ 全盲；练得越熟，提示越少。';
+  }
+  return mode === 'fw'
+    ? '框架跟打：每块一张小卡，「第一/第二/第三」＋「（1）（2）（3）」＋展开句一应俱全（展开句承载背诵逻辑，如主题四的"立执司守"）；每题末尾的「整题框架」串背卡把全题完整串下来。'
+    : '全文跟打：每个主题只有一张大卡＝整题完整全文（标题＋全部块，小点主干＋「一方面/最后」等展开句一应俱全），一次把整篇通背下来；想逐块细练就切回框架模式。绿色下划线为原版墨绿采分点。';
+}
+
+function todayStr(d) {
+  d = d || new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+/* ===== 间隔复习（艾宾浩斯记忆曲线） ===== */
+const REVIEW_STAGES = [1, 2, 4, 7, 15, 30];
+function parseDay(s) {
+  const p = String(s).split('-');
+  return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+}
+function addDaysStr(dayStr, n) {
+  const d = parseDay(dayStr || todayStr());
+  d.setDate(d.getDate() + n);
+  return todayStr(d);
+}
+function diffDays(a, b) { return Math.round((parseDay(a) - parseDay(b)) / 86400000); }
+/* 打完一张卡后安排下次复习：
+   ≥95% 间隔升一档（1→2→4→7→15→30 天）；<85% 回到 1 天；中间保持当前档。
+   peek（默写偷看）不升档。 */
+function scheduleReview(rec, acc, peeked, id) {
+  const st = rec.stage || 0;
+  if (peeked) {
+    rec.dueDay = addDaysStr(todayStr(), REVIEW_STAGES[st]);
+  } else if (acc >= 0.95) {
+    rec.stage = Math.min(st + 1, 5);
+    rec.dueDay = addDaysStr(todayStr(), REVIEW_STAGES[Math.min(st, 5)]);
+  } else if (acc < 0.85) {
+    rec.stage = 0;
+    rec.dueDay = addDaysStr(todayStr(), REVIEW_STAGES[0]);
+  } else {
+    rec.dueDay = addDaysStr(todayStr(), REVIEW_STAGES[st]);
+  }
+  clampDue(rec, id);
+}
+function strHash(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+/* 考前收口：复习日不排到考试之后——超过的压到考前 1–4 天（按卡散开，避免堆在考前一天） */
+function clampDue(rec, id) {
+  const exam = store.settings.examDay;
+  if (!exam || !rec || !rec.dueDay) return;
+  if (rec.dueDay > addDaysStr(exam, -1)) rec.dueDay = addDaysStr(exam, -(1 + strHash(id) % 4));
+}
+function fmtMD(s) {
+  const p = String(s).split('-');
+  return Number(p[1]) + '月' + Number(p[2]) + '日';
+}
+/* 成绩弹层用：熟练度变化说明 + 下次复习时间 */
+function starsOf(lv) {
+  lv = Math.max(0, Math.min(lv || 0, 3));
+  return '★'.repeat(lv) + '☆'.repeat(3 - lv);
+}
+/* 练习页徽标：星级 + 数值 + 复习安排 */
+function levelBadge(rec) {
+  if (!rec || !rec.count) return '新卡';
+  const dd = rec.dueDay ? diffDays(rec.dueDay, todayStr()) : null;
+  const due = dd == null ? '' : dd <= 0 ? ' · 已到期' : dd === 1 ? ' · 明天复习' : ' · ' + dd + ' 天后复习';
+  return starsOf(rec.level) + ' ' + rec.level + '/5' + due;
+}
+function levelLine(rec, delta, peeked) {
+  const stars = '★'.repeat(rec.level) + '☆'.repeat(Math.max(0, 3 - Math.min(3, rec.level)));
+  let why;
+  if (peeked) why = '开卷不计';
+  else if (delta > 0) why = '本次 +1';
+  else if (delta < 0) why = '本次 -1';
+  else why = '未达 95% 不变';
+  let due = '';
+  if (rec.dueDay) {
+    const dd = diffDays(rec.dueDay, todayStr());
+    due = '下次复习 ' + fmtMD(rec.dueDay) + (dd <= 0 ? '（已到期）' : dd === 1 ? '（明天）' : '（' + dd + ' 天后）');
+  }
+  return '熟练度 ' + stars + '（' + rec.level + '/5，' + why + '，满 3 为掌握）' + (due ? ' · ' + due : '');
+}
+function fmtTime(ms) {
+  const s = Math.round(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function $(id) { return document.getElementById(id); }
+
+/* 渐隐跟打：采分点先藏（要背的）→ 衔接字次之 → 结构词（第X，（N））最后；同级嵌套，已藏的保持隐藏 */
+const FADE_STEPS = [0, 0.2, 0.4, 0.6, 0.8, 1];
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return h >>> 0;
+}
+function seededShuffle(arr, seed) {
+  const a = arr.slice();
+  let s = (seed >>> 0) || 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+function fadePctText(idx) {
+  return idx >= 5 ? '全盲' : (idx * 20) + '%';
+}
+function updateFadeNote() {
+  const el = $('fadeNote');
+  if (!el) return;
+  el.textContent = store.settings.randomMask
+    ? '随机隐藏：同档位每轮抽不同的词（换卡/再打一遍都换一批）；同轮内切档位只增不减'
+    : '整词隐藏：采分点先藏，结构词全盲才藏；点击立即切换，「再打一遍」自动升档';
+}
+/* 两级词典，先核心后语料：
+   ① CORE_WORDS：按本语料人工整理的领域词表（法治术语、政治固定短语、常用动词名词，2~8 字）。
+      语料仅六千字，纯词频统计会把「马克思主义」这类只出现一两次的真词漏掉、
+      又把「代化」「主义法治」这类跨界 n-gram 收进来——核心词表优先最长匹配，保证真词永远整词成段；
+   ② wordDict()：语料自派生 n-gram（出现 ≥3 次且不以虚词开头的 2~6 字串），兜底衔接核心表没收的词 */
+const CORE_WORDS = ('习近平 重大意义 法治建设 法治理论 马克思主义 中国化 时代化 法治轨道 轨道 全面建设 法治中国 高质量 发展 思想 旗帜 遵循 根本 ' +
+'一方面 另一方面 同时 最后 既要 又要 这就要求 对于 通过 作为 以及 必须 应当 有关 及其 ' +
+'坚持 加强 完善 健全 推进 推动 提高 深化 强化 优化 发挥 形成 建立 建设 构建 实现 突出 解决 处理 把握 落实 履行 维护 遵守 贯彻 实施 纳入 扩大 增加 鼓励 支持 保证 保障 保护 防范 化解 坚定 善于 重视 注重 引领 规范 惩戒 严惩 打击 制裁 纠正 整合 统筹 协调 衔接 融入 体现 认识 认识到 抓住 抓好 担负 回应 提供 运用 树立 培育 筑牢 增强 开展 研究 培养 招录 交流 学习 借鉴 传承 改善 解放 依靠 避免 考虑 推行 加大 明确 率先 突破 拓展 拥护 营造 牢记 感受到 独立 行使 充分 ' +
+'党的领导 人民当家作主 依法治国 全面依法治国 依法执政 依法行政 依法治军 从严治军 依法治网 依宪治国 依宪执政 依规治党 依法保障 依法办事 依法管理 依法经营 依法维护 依法解决 依法打击 依法治理 有机统一 相统一 统一 治国 治理 根本保证 根本立场 根本目的 根本遵循 根本利益 根本政治制度 本质特征 基本方式 基本要求 基本素质 基本权利 政治权利 领导干部 关键少数 党政 主要负责人 第一责任人 法治国家 法治政府 法治社会 法治体系 法治道路 法治思维 法治方式 法治监督 法治保障 法治工作 法治队伍 法治人才 法治文明 法治环境 法治领域 法治改革 法治宣传 法治教育 法治意识 法治素养 法治真谛 法治力量 法治乡村 智慧法治 涉外法治 国内 ' +
+'科学立法 民主立法 依法立法 立法先行 立法程序 立法权限 立法规划 立法重点 立法质量 立法监督 立法工作者 授权立法 立法 严格执法 公正司法 规范执法 公正执法 文明执法 人性化执法 柔性执法 暴力执法 过激执法 综合执法 行政执法 执法体制 执法程序 执法责任 执法人员 执法机关 执法队伍 执法尺度 执法重心 执法流程 执法执纪 执法司法 持证上岗 资格管理 责任制 执法 执纪 ' +
+'司法体制 司法机关 司法人员 司法活动 司法监督 司法权 司法程序 司法权限 司法责任制 司法案例 司法保障 司法 检察监督 检察队伍 检察官 法官 公益诉讼 惩罚性赔偿 民事 职业特点 职业道德 职业化 荣誉感 配套 ' +
+'宪法 宪法监督 宪法解释 宪法规定 宪法实施 宪法法律 宪法教育 贯彻实施 全面实施 报告制度 监督机关 监督职责 监督工作 监督体系 监督合力 监督程序 国家监督 民主监督 群众监督 舆论监督 人民监督 执纪监督 监察监督 层级监督 专门监督 制约监督 全国人大 人民代表大会 常委会 人大 涉宪问题 宣传教育 国民教育 教育体系 青少年 公民权利 法律武器 ' +
+'法律 法律体系 法律规范 法律文化 法律职业 法律职业特点 法律服务 法律法规 国家法律 党内法规 法定程序 法定化 法域外适用 社会律师 公职律师 公司律师 律师队伍 律师权利 律师事务所 律师协会 法学 法学专家 法学教育 公共法律服务 公证员 仲裁员 人民调解员 志愿者 自律 执业 ' +
+'制度 机制 体制 体系 机构 权限 程序 责任 职责 权力 权利 权益 义务 国家安全 安全风险 政治安全 社会稳定 经济发展 政治稳定 文化繁荣 社会和谐 生态良好 生态环境 环境保护 民生 公共服务 公平竞争 市场经济 秩序 政府 政府职能 政府体系 政务公开 行政 行政权力 行政调解 行政裁决 行政复议 行政诉讼 市场 职能 边界 内部 流程 控制 公开 原则 例外 纠纷 解决机制 多元 预防性 多层次 多领域 社会治理 治理水平 治理体系 乡村治理 社会成员 自治 德治 相结合 乡村 ' +
+'党中央 党委 各级党委 党组织 党员 党员干部 党章 主体责任 领导 领导核心 核心作用 核心要义 核心 价值观 中国特色 中国 特色 国情 中华 精华 世界 优秀 文明 成果 环节 领域 底线 对标 西方 军队 绝对 绝对领导 道德 道德领域 道德体系 以德治国 成文 内心 失德 见利忘义 违法 违法行为 违法犯罪 违法失信 褒奖 失信 惩戒机制 教化 人文环境 价值 观念 实际 出发 ' +
+'改革 改革经验 同步推进 修改 废止 祖国 和平统一 祖国统一 重要制度 一国两制 治理工作 互联网 网络 犯罪 制定 完备 高效 严密 有力 规范体系 实施体系 保障体系 科技 科技创新 现代科技 现代化 现代 重要领域 权责 权威 基础工作 长期 德才兼备 政治建设 思想建设 组织建设 组织法规 领导法规 组织者 推动者 实践者 实践 考核 ' +
+'目标 主体 素质 业务 能力 水准 手段 队伍 人才 干部 部门 人员 标准 意识 水平 力度 尺度 现象 范围 功夫 表率 模范 尺子 纪律 矛盾 前提 角度 生产力 情况 方面 关系 作用 要求 工作 内容 重点 中心 基础 关键 少数 问题 意义 经验 理论 道路 方式 环境 生命线 ' +
+'相对人 切身 感受 刑事 有案不移 有案难移 基础工程 实效性 企业家 诚信守法 诚信 战略 布局 国际 交流合作 人类命运共同体 联合国 地位 坚定不移 高素质 政治标准 公正廉洁 必修课 常态化 人员管理 职业保障 从业 结构 数量 社会力量 人才培养 立德树人 德法兼修 基础问题 理论支撑 实务 工作者 尊法学法守法用法 尊崇 敬畏 必备 带头 带头守法 考核标准 真谛 互补 总揽全局 协调各方 机关 统筹推进 制定实施 二者 指引 依据 指导 治党管党 法规意识 执行力度 随意变通 无视 乱象 党章 各项规定 办事 领导作用 问责 问责机制 问责主体 贯通 纪严于法 纪在法前 大多数 ' +
+'经济社会发展 保障作用 经济社会 文化强国 文化立法 文化权益 制度基石 基石 共建 共治 共享 社会治理制度 社会治理体制 党委领导 政府负责 社会协同 公众参与 最严格 最严密 最严厉 予以 破坏 大幅 成本 各类 责任主体 法律责任 ' +
+'政法战线 政治方向 重大 安全风险 防范 枫桥经验 新时代 正确 内部 宗旨 高水平 以人民为中心 以经济建设为中心 经济建设 规范作用 能力建设 政策体系 筑牢 人民防线 重点领域 公共安全 人民群众 人民民主 人民政协 人民 民主 政治 经济 文化 军事 生态 社会 公民 群众 国家 法治 法治轨道 平等 面前 人人 科学 总结 宝贵 最新 成果 广大 最广大 全面 地方 中央 全国 各级 人民调解员 有序 参与 主导 起草 审议 表决 公众 普遍 关心 针对性 可行性 重点 普法 全民普法 全民守法 守法 治已病 治未病 末端 前端 引导 疏导 力量 严格 公正 文明 权威 保障 体系 建设 实践 思维 方式 制度 保障 权益 社会主义 中国特色社会主义 队伍建设 工作机制').split(' ');
+var CORE_SET = null, WORD_DICT = null;
+function coreWords() {
+  if (CORE_SET) return CORE_SET;
+  CORE_SET = new Set(CORE_WORDS.filter(function (w) { return w.length >= 2; }));
+  return CORE_SET;
+}
+function wordDict() {
+  if (WORD_DICT) return WORD_DICT;
+  const STOP = new Set('的和与及在了是更要其对把被从向着之为以按由于地得');
+  const cnt = {};
+  DATA.forEach(function (tp) {
+    tp.blocks.forEach(function (b) {
+      const s = b.full;
+      for (let n = 2; n <= 6; n++) for (let i = 0; i + n <= s.length; i++) {
+        const w = s.slice(i, i + n);
+        let ok = true;
+        for (let k = 0; k < n; k++) if (PUNCT.has(w[k]) || /[0-9０-９]/.test(w[k])) { ok = false; break; }
+        if (ok) cnt[w] = (cnt[w] || 0) + 1;
+      }
+    });
+  });
+  WORD_DICT = new Set(Object.keys(cnt).filter(function (w) {
+    return cnt[w] >= 3 && !STOP.has(w[0]);
+  }));
+  return WORD_DICT;
+}
+/* 词级隐藏单元：采分点短语按顿号/逗号/分号拆成子词（「立法、执法、司法」→三个词），
+   其余文字按词典最长匹配成词、散字两两成窗——绝不藏半个词，一个词一组「□」 */
+function wordUnits(card) {
+  const t = card.target;
+  const segs = [];  // {start,end,cls}  cls: kw|normal|struct
+  card.kws.forEach(function (k) {
+    const phrase = t.slice(k.start, k.end);
+    const parts = phrase.split(/([、，；,;])/);
+    let p = k.start;
+    parts.forEach(function (part) {
+      if (!part) return;
+      if (/^[、，；,;]$/.test(part)) { p += part.length; return; }
+      segs.push({ start: p, end: p + part.length, cls: 'kw' });
+      p += part.length;
+    });
+  });
+  const structural = [];
+  let m; const re = /第[一二三四五六七八九十]+，|[一二三四五六七八九十]+、|（\d+）|\d+[.．]/g;
+  while ((m = re.exec(t))) {
+    /* 「权责统一、」「全国统一、」里的「一、」不是序号：汉字序号只认开头或紧跟标点的位置 */
+    if (/[，、]$/.test(m[0]) && m.index > 0 && !PUNCT.has(t[m.index - 1])) continue;
+    structural.push({ start: m.index, end: m.index + m[0].length, cls: 'struct' });
+  }
+  /* 引号/书名号内是术语（“一国两制”、《宪法》）——未被采分点占用时整体成段，不按词典拆 */
+  const kwCovered = new Set();
+  segs.forEach(function (s) { for (let i = s.start; i < s.end; i++) if (!PUNCT.has(t[i])) kwCovered.add(i); });
+  const qre = /“[^”]+”|《[^》]+》/g;
+  let qm;
+  while ((qm = qre.exec(t))) {
+    let free = true;
+    for (let i = qm.index + 1; i < qm.index + qm[0].length - 1; i++) if (kwCovered.has(i)) { free = false; break; }
+    if (free) segs.push({ start: qm.index + 1, end: qm.index + qm[0].length - 1, cls: 'term' });
+  }
+  structural.forEach(function (s) { segs.push(s); });
+  /* 其余连续文字段：核心词表 → 语料词典 最长匹配成词；散字两两成窗 */
+  const covered = new Set();
+  segs.forEach(function (s) { for (let i = s.start; i < s.end; i++) if (!PUNCT.has(t[i])) covered.add(i); });
+  const dict = wordDict(), core = coreWords();
+  let i0 = 0;
+  while (i0 < t.length) {
+    if (covered.has(i0) || PUNCT.has(t[i0])) { i0++; continue; }
+    let j = i0;
+    while (j < t.length && !covered.has(j) && !PUNCT.has(t[j])) j++;
+    const pend = [];
+    const flushPend = function () {
+      for (let q = 0; q + 1 < pend.length; q += 2) segs.push({ start: pend[q], end: pend[q] + 2, cls: 'normal' });
+      if (pend.length % 2) segs.push({ start: pend[pend.length - 1], end: pend[pend.length - 1] + 1, cls: 'normal' });
+      pend.length = 0;
+    };
+    let p = i0;
+    while (p < j) {
+      let hit = 0;
+      for (let n = Math.min(8, j - p); n >= 2; n--) {
+        if (core.has(t.slice(p, p + n))) {
+          flushPend();
+          segs.push({ start: p, end: p + n, cls: 'normal' });
+          p += n; hit = n; break;
+        }
+      }
+      if (!hit) for (let n = Math.min(6, j - p); n >= 2; n--) {
+        if (dict.has(t.slice(p, p + n))) {
+          flushPend();
+          segs.push({ start: p, end: p + n, cls: 'normal' });
+          p += n; hit = n; break;
+        }
+      }
+      if (!hit) { pend.push(p); p++; }
+    }
+    flushPend();
+    i0 = j;
+  }
+  /* 单字修复：落单的散字并入相邻段（能拼成词典词的方向优先，否则并前段）——绝不留 1 字隐藏块 */
+  const norm = segs.filter(function (s) { return s.cls === 'normal'; })
+    .sort(function (a, b) { return a.start - b.start; });
+  norm.forEach(function (s) {
+    if (s.end - s.start !== 1 || s.dead) return;
+    let prev = null, next = null;
+    norm.forEach(function (x) {
+      if (x === s || x.dead) return;
+      if (x.end === s.start) prev = x;
+      if (x.start === s.end) next = x;
+    });
+    if (prev && (core.has(t.slice(prev.start, s.end)) || dict.has(t.slice(prev.start, s.end)))) { prev.end = s.end; s.dead = true; }
+    else if (next && (core.has(t.slice(s.start, next.end)) || dict.has(t.slice(s.start, next.end)))) { next.start = s.start; s.dead = true; }
+    else if (prev) { prev.end = s.end; s.dead = true; }
+    else if (next) { next.start = s.start; s.dead = true; }
+  });
+  return segs.filter(function (s) { return !s.dead; });
+}
+function pickMask(card, fade, opts) {
+  const t = card.target;
+  const mask = new Set();
+  const fil = fillerMask(t);
+  if (!fade || fade <= 0) return mask;
+  const segs = wordUnits(card);
+  const kws = segs.filter(function (s) { return s.cls === 'kw'; });
+  const terms = segs.filter(function (s) { return s.cls === 'term'; });
+  const normal = segs.filter(function (s) { return s.cls === 'normal'; });
+  const struct = segs.filter(function (s) { return s.cls === 'struct'; });
+  const hideableChars = kws.concat(terms, normal).reduce(function (n, s) { return n + (s.end - s.start); }, 0);
+  /* 随机模式（可变检索练习）：同档位每轮抽不同的词——采分点不再保底优先，
+     全部词平等进池、按轮种子乱序、凑够比例为止；结构词仍只在全盲时藏。
+     同一种子下升档为严格超集（已藏的词不会重新露出） */
+  if (opts && opts.random) {
+    const pool = seededShuffle(kws.concat(terms, normal), opts.seed >>> 0);
+    if (fade >= 1) pool.push.apply(pool, struct);
+    const budget = fade >= 1 ? Infinity : Math.round(hideableChars * fade);
+    let used = 0;
+    /* 贪心整词收取、凑够即停（末段允许略超预算）：
+       不做「超预算就跳过」——那会破坏单调性（低档跳过的长词在高档被收走预算，原本收得进的短词反而掉出去），
+       升档就不再是只增不减了 */
+    for (let k = 0; k < pool.length; k++) {
+      if (used >= budget) break;
+      const s = pool[k];
+      const len = [...Array(s.end - s.start).keys()].filter(function (x) { return !PUNCT.has(t[s.start + x]); }).length;
+      if (!len) continue;
+      for (let i = s.start; i < s.end; i++) if (!PUNCT.has(t[i])) mask.add(i);  /* 标点不藏：不在 lane 里、永远揭不开，只会留无意义的□ */
+      used += len;
+    }
+    if (fil.size) fil.forEach(function (i) { mask.delete(i); });
+    return mask;
+  }
+  const seed = hashSeed(card.id);
+  /* 采分点最先藏且一档藏完——那正是要背出来的；引号术语次之；衔接词再次；结构词（第X/（N））最后、全盲才藏 */
+  const order = seededShuffle(kws, seed)
+    .concat(seededShuffle(terms, seed + 3), seededShuffle(normal, seed + 7), seededShuffle(struct, seed + 13));
+  let budgetChars = fade >= 1 ? Infinity : Math.round(hideableChars * fade);
+  if (fade < 1) budgetChars = Math.min(hideableChars, Math.max(budgetChars,
+    kws.reduce(function (n, s) { return n + (s.end - s.start); }, 0)));
+  let used = 0;
+  for (let k = 0; k < order.length; k++) {
+    const s = order[k];
+    if (used >= budgetChars) break;
+    const len = [...Array(s.end - s.start).keys()].filter(function (x) { return !PUNCT.has(t[s.start + x]); }).length;
+    if (!len) continue;
+    if (fade < 1 && s.cls !== 'kw' && used + len > budgetChars) continue;  // 非采分点词不超预算拆半
+    for (let i = s.start; i < s.end; i++) if (!PUNCT.has(t[i])) mask.add(i);  /* 标点不藏：避免揭不开的无意义□ */
+    used += len;
+  }
+  if (fil.size) fil.forEach(function (i) { mask.delete(i); });
+  return mask;
+}
+
+/* ================= 卡片目录 ================= */
+/* 骨架抽取：保留 第X中心句 + 句间总括句 + 「（N）小点主干」，
+   去掉小点内部「一方面/另一方面/最后/同时/即/既要」展开句（留给全文模式） */
+function skeletonOf(full) {
+  const markers = [];
+  let m; const re = /（\d+）/g;
+  while ((m = re.exec(full))) markers.push(m.index);
+  if (!markers.length) return { text: full, kept: null, posMap: null };
+  const cutRe = /。(?=一方面|另一方面|最后|同时|即|既要)/;
+  const parts = [], kept = [], posMap = [], cuts = [];
+  let p = 0;
+  function take(from, to) {
+    parts.push(full.slice(from, to));
+    for (let i = from; i < to; i++) { kept.push(i); posMap[i] = p++; }
+  }
+  take(0, markers[0]);
+  for (let k = 0; k < markers.length; k++) {
+    const start = markers[k];
+    const end = k + 1 < markers.length ? markers[k + 1] : full.length;
+    const seg = full.slice(start, end);
+    const cm = seg.match(cutRe);
+    const keepLen = cm ? cm.index + 1 : seg.length;
+    take(start, start + keepLen);
+    if (cm && keepLen < seg.length) cuts.push(p);  /* 骨架文本中该位置省略了展开句 */
+  }
+  return { text: parts.join(''), kept: kept, posMap: posMap, cuts: cuts };
+}
+
+function buildCatalog(data) {
+  const cards = [];
+  data.forEach(function (t, ti) {
+    /* 每块一张框架小卡：完整内容（含"一方面/另一方面/最后"展开句）——四页纸的展开句多承载背诵逻辑（如主题四块2的"立执司守"），裁掉会断链；单块主题跳过，只出整题卡，避免重复 */
+    if (t.blocks.length > 1) t.blocks.forEach(function (b, bi) {
+      cards.push({
+        id: 'F' + ti + '-' + bi, mode: 'fw', ti: ti, bi: bi, topic: t.title,
+        target: b.full, kws: b.kws, logic: b.logic || t.logic, law: b.law, notes: b.notes
+      });
+    });
+    /* 整题框架串背卡：标题＋全部块「完整」内容（v3.3.1 起不再裁展开句，与全文串背卡一致）；沿用旧 id 保留历史进度 */
+    const prefix = t.title + '。';
+    let off = prefix.length;
+    const parts = [], fwKws = [];
+    t.blocks.forEach(function (b) {
+      parts.push(b.full);
+      (b.kws || []).forEach(function (k) {
+        fwKws.push({ start: k.start + off, end: k.end + off });
+      });
+      off += b.full.length;
+    });
+    cards.push({
+      id: 'F' + ti, mode: 'fw', ti: ti, bi: -1, topic: t.title,
+      target: prefix + parts.join(''), kws: fwKws, logic: t.logic, law: '', notes: []
+    });
+    /* 全文模式：每个主题只出一张大卡＝整题全文（标题＋全部块完整内容）。
+       「全文」就是整篇一次背，块级细练交给框架模式，故不再拆块卡 */
+    const fPrefix = t.title + '。';
+    let fOff = fPrefix.length;
+    const fParts = [], fKws = [];
+    t.blocks.forEach(function (b) {
+      fParts.push(b.full);
+      (b.kws || []).forEach(function (k) {
+        fKws.push({ start: k.start + fOff, end: k.end + fOff });
+      });
+      fOff += b.full.length;
+    });
+    cards.push({
+      id: 'B' + ti, mode: 'full', ti: ti, bi: -1, topic: t.title,
+      target: fPrefix + fParts.join(''), kws: fKws, logic: t.logic, law: '', notes: []
+    });
+  });
+  return cards;
+}
+
+/* ================= 打字核心（纯函数） ================= */
+function buildLanes(target, skipPunct, filler) {
+  const lane = [];
+  for (let i = 0; i < target.length; i++) {
+    if (skipPunct && PUNCT.has(target[i])) continue;
+    if (filler && filler.has(i)) continue;
+    lane.push(i);
+  }
+  return lane;
+}
+/* 结构分行（渲染层）：大点「第X，」与各小点「（N）」「N.」前换行，各占一行；不改字符序，不影响打字判定与进度 */
+function lineBreaksOf(target) {
+  const brk = new Set();
+  let m; const re = /（\d+）|\d+\.|第[一二三四五六七八九十]+，/g;
+  while ((m = re.exec(target))) {
+    if (m.index > 0) brk.add(m.index);
+  }
+  return brk;
+}
+/* 对齐输入与原文（忽略多打的「的」）：
+   原文该位不是「的」时，输入中多出的「的」（可连续）若其后紧跟原文该位字符，则跳过不判（map=-1）；
+   输入末尾悬着尚未判定的「的」标记 map=-2（待定，暂不算错也不推进光标）；
+   其余一一对应，map[j]=lane 位置下标。 */
+function alignDe(target, lane, val) {
+  const map = new Array(val.length).fill(-1);
+  let i = 0, j = 0;
+  while (j < val.length) {
+    if (i >= lane.length) { for (; j < val.length; j++) map[j] = -2; break; }
+    const t = target[lane[i]];
+    if (val[j] === t) { map[j] = i; i++; j++; continue; }
+    if (val[j] === '的' && t !== '的') {
+      let k = j, cnt = 0;
+      while (k < val.length && val[k] === '的' && cnt < 4) { k++; cnt++; }
+      if (k < val.length && val[k] === t) { for (; j < k; j++) map[j] = -1; continue; }
+      if (k >= val.length) { for (; j < val.length; j++) map[j] = -2; break; }
+    }
+    map[j] = i; i++; j++;
+  }
+  return { map: map, nextI: i };
+}
+function computeStats(target, lane, val, tail) {
+  const ali = alignDe(target, lane, val);
+  let correct = 0; const errs = [];
+  for (let j = 0; j < val.length; j++) {
+    const pi = ali.map[j];
+    if (pi < 0) continue;   /* 多打的「的」：不计对错 */
+    if (val[j] === target[lane[pi]]) correct++;
+    else errs.push({ j: j, i: pi, exp: target[lane[pi]], got: val[j] });
+  }
+  let done = lane.length > 0 && ali.nextI >= lane.length;
+  /* 标点不判定时，句末符号（句号等）也必须打出来才算完成 */
+  let pendingFinal = false;
+  if (done && tail != null) {
+    const li = target.length - 1;
+    if (PUNCT.has(target[li]) && lane[lane.length - 1] !== li) {
+      if (tail === target[li]) pendingFinal = false;
+      else { pendingFinal = true; done = false; }
+    }
+  }
+  return {
+    typed: Math.min(val.length, lane.length), correct: correct, errs: errs,
+    done: done, pendingFinal: pendingFinal,
+    acc: lane.length ? correct / lane.length : 0,
+    map: ali.map, nextI: ali.nextI
+  };
+}
+
+/* 输入规整：去空白；关联词不判定时按 fillerSkipSet 逐下标剔除（保护词内的字保留）；标点不判定时再去掉标点 */
+function normalizeRaw(raw, skipPunct, fRe) {
+  let s = String(raw).replace(/\s/g, '');
+  if (fRe) {
+    const sk = fillerSkipSet(s);
+    if (sk.size) {
+      let o = '';
+      for (let i = 0; i < s.length; i++) if (!sk.has(i)) o += s[i];
+      s = o;
+    }
+  }
+  if (!skipPunct) return s;
+  let out = '';
+  for (const ch of s) if (!PUNCT.has(ch)) out += ch;
+  return out;
+}
+
+/* LCS 对齐：返回 T 每个字符是否被 U 按顺序命中（默写模式覆盖率判定） */
+function lcsMarks(T, U) {
+  const n = T.length, m = U.length;
+  const dp = [];
+  for (let i = 0; i <= n; i++) dp.push(new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = T[i] === U[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const hit = new Array(n).fill(false);
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (T[i] === U[j]) { hit[i] = true; i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  return hit;
+}
+
+function autoGrow(t) {
+  t.style.height = 'auto';
+  t.style.height = Math.min(t.scrollHeight, 240) + 'px';
+}
+
+/* 默写难度阶梯：熟练度 0–1 露关键词 → 2 露首字 → 3+ 全盲 */
+var HINT_NAMES = { kw: '关键词提示', first: '首字提示', blind: '全盲默写' };
+function hintByLevel(level) {
+  return level <= 1 ? 'kw' : level === 2 ? 'first' : 'blind';
+}
+function buildHintMask(card, hint) {
+  const t = card.target, n = t.length;
+  const vis = new Array(n).fill(false);
+  if (hint === 'blind') return vis;
+  for (let i = 0; i < n; i++) if (PUNCT.has(t[i])) vis[i] = true;
+  if (hint === 'kw') {
+    card.kws.forEach(function (k) { for (let i = k.start; i < k.end; i++) vis[i] = true; });
+    let m; const re = /第[一二三四五六七八九十]+，|（\d+）/g;
+    while ((m = re.exec(t))) for (let i = m.index; i < m.index + m[0].length; i++) vis[i] = true;
+    return vis;
+  }
+  let segStart = true, i = 0;
+  while (i < n) {
+    const rest = t.slice(i);
+    const num = rest.match(/^（\d+）/);
+    if (num) { for (let k2 = i; k2 < i + num[0].length; k2++) vis[k2] = true; i += num[0].length; continue; }
+    const ord = rest.match(/^第[一二三四五六七八九十]+，/);
+    if (ord) { for (let k2 = i; k2 < i + ord[0].length; k2++) vis[k2] = true; i += ord[0].length; continue; }
+    const ch = t[i];
+    if (PUNCT.has(ch)) { if ('。；：'.indexOf(ch) >= 0) segStart = true; i++; continue; }
+    if (segStart) { vis[i] = true; segStart = false; }
+    i++;
+  }
+  return vis;
+}
+
+/* ================= 进度存取 ================= */
+function loadStore() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_KEY));
+    if (s && s.v === 1 && s.settings) {
+      if (!Array.isArray(s.records)) s.records = [];
+      return s;
+    }
+  } catch (e) { }
+  return { v: 1, settings: { skipPunct: true, mode: 'fw', method: 'follow', recallHint: 'auto', fadeFollow: true, stuckHint: true, fadeLevel: 0, examDay: '2026-10-18', fs: 'm', fsAuto: true }, cards: {}, daily: {}, records: [], selectStats: { byQ: {} } };
+}
+function saveStore() {
+  if (store.records.length > 500) store.records = store.records.slice(-500);
+  try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch (e) { }
+}
+/* 非破坏式合并导入：把 incoming 并进 local（本机为准的 settings/pending 保留），
+   每张卡取更优进度、每日练习量累加、记录合并去重、抽题统计取优累加 */
+function mergeStore(local, incoming) {
+  const out = JSON.parse(JSON.stringify(local || {}));
+  out.cards = out.cards || {}; out.daily = out.daily || {};
+  out.records = out.records || []; out.selectStats = out.selectStats || { byQ: {} };
+  out.selectStats.byQ = out.selectStats.byQ || {};
+  const better = function (a, b) {  // 返回更“靠前”的那条进度
+    if (!a) return b; if (!b) return a;
+    if ((b.level || 0) !== (a.level || 0)) return (b.level || 0) > (a.level || 0) ? b : a;
+    if ((b.count || 0) !== (a.count || 0)) return (b.count || 0) > (a.count || 0) ? b : a;
+    return (b.lastTs || 0) > (a.lastTs || 0) ? b : a;
+  };
+  Object.keys(incoming.cards || {}).forEach(function (id) {
+    out.cards[id] = better(out.cards[id], incoming.cards[id]);
+  });
+  Object.keys(incoming.daily || {}).forEach(function (day) {
+    const b = incoming.daily[day] || {}, a = out.daily[day];
+    if (!a) { out.daily[day] = { done: b.done || 0, chars: b.chars || 0, errors: b.errors || 0, ms: b.ms || 0 }; return; }
+    a.done += b.done || 0; a.chars += b.chars || 0; a.errors += b.errors || 0; a.ms += b.ms || 0;
+  });
+  const seen = new Set();
+  out.records = out.records.concat(incoming.records || []).filter(function (r) {
+    const k = (r.t || 0) + '|' + (r.id || '') + '|' + (r.meth || '');
+    if (seen.has(k)) return false; seen.add(k); return true;
+  }).sort(function (x, y) { return (x.t || 0) - (y.t || 0); });
+  if (out.records.length > 500) out.records = out.records.slice(-500);
+  Object.keys((incoming.selectStats || {}).byQ || {}).forEach(function (k) {
+    const a = out.selectStats.byQ[k], b = incoming.selectStats.byQ[k];
+    if (!a) { out.selectStats.byQ[k] = b; return; }
+    out.selectStats.byQ[k] = { ok: Math.max(a.ok || 0, b.ok || 0), wrong: (a.wrong || 0) + (b.wrong || 0) };
+  });
+  return out;
+}
+function addRecord(rec) {
+  store.records.push(rec);
+}
+function cardRec(id) {
+  if (!store.cards[id]) store.cards[id] = { level: 0, count: 0, lastTs: 0, lastAcc: -1, lastDay: '', stage: 0, dueDay: '' };
+  return store.cards[id];
+}
+function dailyRec(day) {
+  if (!store.daily[day]) store.daily[day] = { done: 0, chars: 0, errors: 0, ms: 0 };
+  return store.daily[day];
+}
+function calcStreak() {
+  const days = Object.keys(store.daily).filter(function (d) { return store.daily[d].done > 0; }).sort();
+  if (!days.length) return 0;
+  const set = {}; days.forEach(function (d) { set[d] = 1; });
+  const today = todayStr();
+  const yest = todayStr(new Date(Date.now() - 86400000));
+  if (!set[today] && !set[yest]) return 0;
+  let cur = set[today] ? today : yest;
+  let n = 0;
+  while (set[cur]) { n++; cur = todayStr(new Date(new Date(cur + 'T12:00:00').getTime() - 86400000)); }
+  return n;
+}
+
+/* ================= 队列调度 ================= */
+function smartQueue(mode) {
+  const list = CARDS.filter(function (c) { return c.mode === mode; });
+  const today = todayStr();
+  const due = [], failed = [], fresh = [], weak = [];
+  list.forEach(function (c) {
+    const r = store.cards[c.id];
+    if (!r || !r.count) fresh.push(c);
+    else if (r.dueDay && r.dueDay <= today) due.push(c);
+    else if (r.lastDay === today && r.lastAcc < 0.9) failed.push(c);
+    else if (r.level < 3) weak.push(c);
+  });
+  const byTs = function (a, b) { return (store.cards[a.id].lastTs || 0) - (store.cards[b.id].lastTs || 0); };
+  const byDue = function (a, b) {
+    const ra = store.cards[a.id], rb = store.cards[b.id];
+    return ra.dueDay === rb.dueDay ? byTs(a, b) : (ra.dueDay < rb.dueDay ? -1 : 1);
+  };
+  due.sort(byDue); failed.sort(byTs); weak.sort(byTs);
+  return due.concat(failed, fresh, weak);
+}
+function reviewQueue(mode) {
+  const today = todayStr();
+  const due = [], weak = [], seen = {};
+  CARDS.forEach(function (c) {
+    if (c.mode !== mode) return;
+    const r = store.cards[c.id];
+    if (!r || !r.count) return;
+    if (r.dueDay && r.dueDay <= today) { due.push(c); seen[c.id] = 1; return; }
+    if (!seen[c.id] && r.lastDay === today && r.lastAcc < 0.9) weak.push(c);
+  });
+  const byTs = function (a, b) { return (store.cards[a.id].lastTs || 0) - (store.cards[b.id].lastTs || 0); };
+  due.sort(function (a, b) {
+    const ra = store.cards[a.id], rb = store.cards[b.id];
+    return ra.dueDay === rb.dueDay ? byTs(a, b) : (ra.dueDay < rb.dueDay ? -1 : 1);
+  });
+  weak.sort(byTs);
+  return due.concat(weak);
+}
+/* 考前倒排：今日任务 = 到期复习（含当日待巩固）＋ 按计划的新卡配额。
+   首轮截止 = 考前 8 天，之后进入纯复习冲刺；配额 = 剩余新卡 ÷ 剩余天数（向上取整）。 */
+function todayTask(mode) {
+  const exam = store.settings.examDay;
+  const due = reviewQueue(mode);
+  const fresh = CARDS.filter(function (c) {
+    return c.mode === mode && !(store.cards[c.id] && store.cards[c.id].count);
+  }).sort(function (a, b) { return a.ti - b.ti || (a.bi || -1) - (b.bi || -1); });
+  let quota = fresh.length, deadline = '', daysLeft = 0;
+  if (exam) {
+    deadline = addDaysStr(exam, -8);
+    daysLeft = diffDays(deadline, todayStr()) + 1;
+    if (daysLeft > 0) quota = Math.min(fresh.length, Math.ceil(fresh.length / daysLeft));
+  }
+  return { due: due, freshTake: fresh.slice(0, quota), freshAll: fresh.length,
+    quota: quota, deadline: deadline, daysLeft: daysLeft };
+}
+
+/* ================= 全局状态 ================= */
+var CARDS = buildCatalog(DATA);
+var store = loadStore();
+if (!store.settings.method) store.settings.method = 'follow';
+if (!store.settings.mode) store.settings.mode = 'fw';
+if (!store.settings.recallHint) store.settings.recallHint = 'auto';
+if (typeof store.settings.skipPunct !== 'boolean') store.settings.skipPunct = true;
+if (typeof store.settings.fadeFollow !== 'boolean') store.settings.fadeFollow = true;
+if (typeof store.settings.fadeLevel !== 'number' || store.settings.fadeLevel < 0 || store.settings.fadeLevel > 5) store.settings.fadeLevel = 0;
+if (typeof store.settings.examDay !== 'string') store.settings.examDay = '2026-10-18';
+if (typeof store.settings.stuckHint !== 'boolean') store.settings.stuckHint = true;
+if (store.settings.fs !== 's' && store.settings.fs !== 'm' && store.settings.fs !== 'l') store.settings.fs = 'm';
+if (typeof store.settings.fsAuto !== 'boolean') store.settings.fsAuto = true;
+if (typeof store.settings.randomMask !== 'boolean') store.settings.randomMask = false;
+if (typeof store.settings.fillerOn !== 'boolean') store.settings.fillerOn = true;
+if (typeof store.settings.fillerWords !== 'string' || !store.settings.fillerWords) store.settings.fillerWords = FILLER_DEFAULT;
+/* 迁移：把旧默认词表升级为扩展版（补齐「或者/并且/而且」等复合形式，消除残留字错位）；自定义词表不动 */
+if (store.settings.fillerWords.replace(/\s/g, '') === FILLER_OLD_DEFAULT ||
+    store.settings.fillerWords.replace(/\s/g, '') === FILLER_OLD2_DEFAULT) store.settings.fillerWords = FILLER_DEFAULT;
+if (typeof store.settings.fillerProtect !== 'string' || !store.settings.fillerProtect) store.settings.fillerProtect = FILLER_PROTECT_DEFAULT;
+if (!store.selectStats || typeof store.selectStats !== 'object') store.selectStats = { byQ: {} };
+if (!store.selectStats.byQ || typeof store.selectStats.byQ !== 'object') store.selectStats.byQ = {};
+/* 迁移：旧进度补排期——按熟练度估计间隔，从最后练习日算起 */
+Object.keys(store.cards).forEach(function (id) {
+  const r = store.cards[id];
+  if (r && r.count && !r.dueDay) {
+    r.stage = Math.min(r.level || 0, 5);
+    r.dueDay = r.lastDay ? addDaysStr(r.lastDay, REVIEW_STAGES[r.stage]) : '';
+  }
+  clampDue(store.cards[id], id);
+});
+var session = null;          // {queue:[card], idx, method, done, chars, errors, ms}
+var cur = null;              // 当前卡片运行态
+var el = {};
+
+/* ================= 首页渲染 ================= */
+function renderHome() {
+  const today = todayStr();
+  const d = store.daily[today] || { done: 0, chars: 0, errors: 0, ms: 0 };
+  const acc = d.chars ? Math.round((1 - d.errors / d.chars) * 100) : null;
+  const spd = d.ms ? Math.round(d.chars / (d.ms / 60000)) : null;
+  $('todayStrip').innerHTML =
+    chip(d.done, '今日卡片', 'today-done') +
+    chip(d.chars, '今日字数') +
+    chip(acc === null ? '—' : acc + '%', '今日正确率') +
+    chip(spd === null ? '—' : spd, '字 / 分钟') +
+    (d.select ? chip(d.select + ' 题', '选择快刷') : '');
+
+  const streak = calcStreak();
+  $('streakNum').textContent = streak;
+  $('streakLabel').textContent = streak ? '天连续打卡' : '天 · 今天还没练';
+
+  const mode = store.settings.mode;
+  const method = store.settings.method || 'follow';
+  Array.prototype.forEach.call($('modeSeg').children, function (b) {
+    b.classList.toggle('on', b.dataset.mode === mode);
+  });
+  Array.prototype.forEach.call($('methodSeg').children, function (b) {
+    b.classList.toggle('on', b.dataset.method === method);
+  });
+  $('hintRow').classList.toggle('hidden', method !== 'recall');
+  Array.prototype.forEach.call($('hintSeg').children, function (b) {
+    b.classList.toggle('on', b.dataset.hint === (store.settings.recallHint || 'auto'));
+  });
+  $('modeDesc').textContent = modeDescText(mode, method, store.settings.recallHint || 'auto');
+
+  const modeCards = CARDS.filter(function (c) { return c.mode === mode; });
+  const mastered = modeCards.filter(function (c) { var r = store.cards[c.id]; return r && r.level >= 3; }).length;
+  const pct = modeCards.length ? Math.round(mastered / modeCards.length * 100) : 0;
+  const lvSum = modeCards.reduce(function (s, c) { return s + ((store.cards[c.id] || {}).level || 0); }, 0);
+  const avgLv = modeCards.length ? (lvSum / modeCards.length).toFixed(1) : '0';
+  $('overallBox').innerHTML =
+    '当前模式总进度：已掌握 <b>' + mastered + '</b> / ' + modeCards.length + ' 张（' + pct + '%，熟练度达 3 为掌握）' +
+    ' · 平均熟练度 <b>★' + avgLv + '</b> / 5' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div>';
+
+  const rv = reviewQueue(mode);
+  $('btnReview').textContent = '到期复习' + (rv.length ? '（' + rv.length + ' 张）' : '');
+  $('btnReview').disabled = rv.length === 0;
+
+  const exam = store.settings.examDay || '';
+  const pbox = $('planBox');
+  if (!exam) {
+    pbox.classList.add('hidden');
+  } else {
+    pbox.classList.remove('hidden');
+    const dd = diffDays(exam, today);
+    $('planCd').textContent = dd > 0 ? '距考试 ' + dd + ' 天' : dd === 0 ? '今天考试，正常发挥' : '考试已结束';
+    $('planDate').textContent = exam + ' · 考试日期可在下方设置中修改';
+    const t = todayTask(mode);
+    const qn = t.due.length + t.freshTake.length;
+    let taskTxt;
+    if (t.daysLeft > 0 && t.freshAll > 0) {
+      taskTxt = '今日任务：复习 ' + t.due.length + ' 张（到期/待巩固）＋ 新卡 ' + t.freshTake.length + ' 张。' +
+        '按计划 ' + fmtMD(t.deadline) + '（' + t.daysLeft + ' 天后）完成首轮，考前 8 天转入纯复习冲刺；当前剩余新卡 ' + t.freshAll + ' 张';
+    } else if (t.freshAll > 0) {
+      taskTxt = '今日任务：复习 ' + t.due.length + ' 张 ＋ 剩余新卡 ' + t.freshAll + ' 张（首轮截止已过，建议尽快完成）';
+    } else {
+      taskTxt = '今日任务：复习 ' + t.due.length + ' 张 —— 首轮已完成，考前以到期复习为主，间隔已自动收口到考试前';
+    }
+    $('planTask').textContent = taskTxt;
+    const dn = (store.daily[today] || {}).done || 0;
+    $('planDone').textContent = '今日已练 ' + dn + ' 张';
+    $('btnTask').textContent = qn ? '开始今日任务（' + qn + ' 张）' : '今日任务已完成';
+    $('btnTask').disabled = !qn;
+  }
+
+  const p = store.pending;
+  const box = $('resumeBox');
+  if (p && Array.isArray(p.ids) && p.idx < p.ids.length && p.idx > 0) {
+    const byId = {};
+    CARDS.forEach(function (c) { byId[c.id] = c; });
+    if (p.ids.every(function (id) { return byId[id]; })) {
+      const card = byId[p.ids[p.idx]];
+      box.classList.remove('hidden');
+      $('resumeName').textContent = p.name || '练习';
+      $('resumeInfo').textContent = '第 ' + (p.idx + 1) + ' / ' + p.ids.length + ' 张 · ' + (card ? cardName(card) : '');
+      $('btnResumeGo').onclick = function () {
+        if (!resumePending()) { box.classList.add('hidden'); toast('断点已失效'); }
+      };
+      $('btnResumeDrop').onclick = function () {
+        savePending(true);
+        box.classList.add('hidden');
+        toast('已放弃断点，从头开始');
+      };
+    } else box.classList.add('hidden');
+  } else box.classList.add('hidden');
+
+  renderTopicGrid(mode);
+  $('optSkip').checked = !!store.settings.skipPunct;
+  $('optFiller').checked = !!store.settings.fillerOn;
+  $('fillerWords').value = store.settings.fillerWords || FILLER_DEFAULT;
+  $('fillerProtect').value = store.settings.fillerProtect || FILLER_PROTECT_DEFAULT;
+  $('optFade').checked = store.settings.fadeFollow !== false;
+  $('optRandomMask').checked = store.settings.randomMask === true;
+  $('optStuck').checked = store.settings.stuckHint !== false;
+  updateFadeNote();
+}
+function chip(v, k, cls) {
+  return '<div class="stat-chip ' + (cls || '') + '"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>';
+}
+function renderTopicGrid(mode) {
+  const grid = $('topicGrid');
+  grid.innerHTML = '';
+  DATA.forEach(function (t, ti) {
+    const cards = CARDS.filter(function (c) { return c.mode === mode && c.ti === ti; });
+    const m = cards.filter(function (c) { var r = store.cards[c.id]; return r && r.level >= 3; }).length;
+    const lvSum = cards.reduce(function (s, c) { return s + ((store.cards[c.id] || {}).level || 0); }, 0);
+    const avgLv = cards.length ? (lvSum / cards.length).toFixed(1) : '0';
+    const started = cards.some(function (c) { return store.cards[c.id] && store.cards[c.id].count; });
+    const allDone = cards.length && m === cards.length;
+    const btn = document.createElement('button');
+    btn.className = 'topic-card';
+    btn.innerHTML =
+      '<span class="t-num ' + (allDone ? 'mastered' : started ? 'started' : '') + '">' + (ti + 1) + '</span>' +
+      '<span class="t-title">' + esc(t.title) + '</span>' +
+      '<div class="t-meta"><span>' + (mode === 'fw' ? '框架 ' + cards.length + ' 张' : '全文 ' + cards.length + ' 张') + '</span>' +
+      '<span>掌握 ' + m + '/' + cards.length + '</span><span class="t-lv">★' + avgLv + '</span></div>' +
+      '<div class="t-bar"><i style="width:' + (cards.length ? Math.round(m / cards.length * 100) : 0) + '%"></i></div>';
+    btn.onclick = function () {
+      if (mode === 'full') {
+        /* 全文模式每主题只一张大卡：点任一主题＝从该主题起把全部主题大卡串成队列，可上下切主题 */
+        const all = CARDS.filter(function (c) { return c.mode === 'full'; })
+          .sort(function (a, b) { return a.ti - b.ti; });
+        let si = 0;
+        all.forEach(function (c, k) { if (c.ti === ti) si = k; });
+        startSession(all.slice(si).concat(all.slice(0, si)), '全文通背 · 从主题 ' + (ti + 1) + ' 起');
+      } else {
+        startSession(cards.slice(), '主题练习 · ' + t.title.slice(0, 14));
+      }
+    };
+    grid.appendChild(btn);
+  });
+}
+
+/* ================= 练习流程 ================= */
+function startSession(queue, name) {
+  session = { queue: queue, idx: 0, name: name, method: store.settings.method || 'follow', done: 0, chars: 0, errors: 0, ms: 0 };
+  savePending(false);
+  $('viewHome').classList.add('hidden');
+  $('viewPractice').classList.remove('hidden');
+  loadCard();
+}
+/* 会话断点：退出练习页时自动保存，回来续练 */
+function savePending(clear) {
+  if (clear) {
+    delete store.pending;
+  } else if (session) {
+    store.pending = {
+      ids: session.queue.map(function (c) { return c.id; }),
+      idx: session.idx, name: session.name, method: session.method,
+      done: session.done, chars: session.chars, errors: session.errors, ms: session.ms,
+      savedAt: Date.now()
+    };
+  }
+  saveStore();
+}
+function resumePending() {
+  const p = store.pending;
+  if (!p || !Array.isArray(p.ids) || !p.ids.length) return false;
+  const byId = {};
+  CARDS.forEach(function (c) { byId[c.id] = c; });
+  const queue = [];
+  for (let i = 0; i < p.ids.length; i++) {
+    if (!byId[p.ids[i]]) return false;   // 数据结构变了（版本升级），放弃续练
+    queue.push(byId[p.ids[i]]);
+  }
+  if (p.idx < 0 || p.idx >= queue.length) return false;
+  session = { queue: queue, idx: Math.min(p.idx, queue.length - 1), name: p.name || '续练',
+    method: p.method || store.settings.method || 'follow',
+    done: p.done || 0, chars: p.chars || 0, errors: p.errors || 0, ms: p.ms || 0 };
+  $('viewHome').classList.add('hidden');
+  $('viewPractice').classList.remove('hidden');
+  loadCard();
+  toast('已从断点续练：第 ' + (session.idx + 1) + ' / ' + session.queue.length + ' 张');
+  return true;
+}
+/* 退出二次确认：只有存在"未提交的已输入内容"时才拦截 */
+function confirmExitPractice() {
+  const inp = $('pInput');
+  const typing = cur && !cur.finished && inp && inp.value && inp.value.length > 0;
+  if (!typing) return true;
+  return confirm('练习进行中：当前卡片已输入 ' + inp.value.length + ' 字，尚未提交。\n\n· 队列断点会保存，回来可从本卡继续\n· 但本卡已输入的内容不会保留，需重新打\n\n确定要退出吗？');
+}
+function confirmExitQuiz() {
+  if (!quiz || quiz.over) return true;
+  const total = quiz.correct + quiz.wrong;
+  if (total === 0) return true;
+  return confirm('选择快刷进行中：已答 ' + total + ' 题（对 ' + quiz.correct + ' / 错 ' + quiz.wrong + '）。\n\n退出后已答题目计入成绩，剩余题目不保留。\n\n确定要退出吗？');
+}
+function endSession(save) {
+  if (save && session && session.idx < session.queue.length) {
+    savePending(false);
+    toast('进度已保存，回来可从第 ' + (session.idx + 1) + ' 张继续');
+  } else {
+    savePending(true);
+  }
+  session = null; cur = null;
+  $('viewPractice').classList.add('hidden');
+  $('overlay').classList.add('hidden');
+  $('viewHome').classList.remove('hidden');
+  renderHome();
+}
+/* ================= 选择快刷 ================= */
+const QUIZ_N = 10;
+function shuffleArr(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+/* 全局采分点词池（2–8 字），用于出题与干扰项 */
+function kwWordPool(mode) {
+  const pool = [];
+  CARDS.forEach(function (c) {
+    if (c.bi < 0 || (mode && c.mode !== mode)) return;  // 整题串背卡与块卡重复，不出题
+    c.kws.forEach(function (k) {
+      const t = c.target.slice(k.start, k.end);
+      if (t.length >= 2 && t.length <= 8) pool.push({ card: c, start: k.start, end: k.end, text: t });
+    });
+  });
+  return pool;
+}
+/* 干扰项：与答案字符重叠度高的近义词优先（四页纸里"根本保证/根本遵循"这类互坑正是考点），
+   取相似前 8 随机 3 个，每次组合都不同 */
+function quizChoices(ansText, globalPool) {
+  const uniq = {};
+  globalPool.forEach(function (w) {
+    if (w.text !== ansText && w.text.indexOf(ansText) < 0 && ansText.indexOf(w.text) < 0 && !uniq[w.text]) uniq[w.text] = 1;
+  });
+  const cands = Object.keys(uniq);
+  function sim(b) {
+    const set = new Set(ansText.split(''));
+    let n = 0;
+    for (let i = 0; i < b.length; i++) if (set.has(b[i])) n++;
+    return n - Math.abs(b.length - ansText.length) * 0.4;
+  }
+  cands.sort(function (x, y) { return sim(y) - sim(x); });
+  const picks = shuffleArr(cands.slice(0, 8)).slice(0, 3);
+  ['依法治国', '依法执政', '依法行政'].forEach(function (f) { if (picks.length < 3 && f !== ansText && picks.indexOf(f) < 0) picks.push(f); });
+  return shuffleArr(picks.concat([ansText]));
+}
+/* 出题只认学习进度：没学过的卡（count=0）一律不抽。
+   层：0 今天该复习（到期/逾期，无论星级）/ 1 巩固中（已学未满 3 星）/ 2 已掌握 */
+function quizPri(w) {
+  const r = store.cards[w.card.id];
+  if (!r || !r.count) return -1;
+  const dd = r.dueDay ? diffDays(r.dueDay, todayStr()) : 999;
+  if (dd <= 0) return 0;
+  return r.level < 3 ? 1 : 2;
+}
+function quizSrcLabel(w) {
+  const r = store.cards[w.card.id];
+  if (!r || !r.count) return '';
+  const dd = r.dueDay ? diffDays(r.dueDay, todayStr()) : 999;
+  if (dd <= 0) return '今日该复习';
+  return r.level < 3 ? '巩固中' : '已掌握';
+}
+/* 根据学习进度抽题：只从已学卡里抽（跟随你的学习进度），今天该复习的最优先；
+   答对过 2 次的题轮换；不足回退已学全池，但绝不抽没学过的卡 */
+function buildQuiz(mode) {
+  const globalPool = kwWordPool(null);
+  const byQ = store.selectStats.byQ;
+  const learned = kwWordPool('fw').filter(function (w) {
+    const r = store.cards[w.card.id];
+    return r && r.count > 0;
+  });
+  let pool = learned.filter(function (w) {
+    const rec = byQ[w.card.id + ':' + w.start];
+    return !rec || rec.ok < 2;
+  });
+  if (pool.length < QUIZ_N) pool = learned;
+  const layers = [[], [], []];
+  pool.forEach(function (w) {
+    const p = quizPri(w);
+    if (p >= 0) layers[p].push(w);
+  });
+  layers.forEach(shuffleArr);
+  const picked = [];
+  outer: for (let L = 0; L < layers.length; L++) {
+    for (let i = 0; i < layers[L].length; i++) {
+      picked.push(layers[L][i]);
+      if (picked.length >= QUIZ_N) break outer;
+    }
+  }
+  return picked.map(function (w) {
+    return { card: w.card, start: w.start, end: w.end, text: w.text,
+      choices: quizChoices(w.text, globalPool), redo: false,
+      src: quizSrcLabel(w), pri: quizPri(w) };
+  });
+}
+let quiz = null;
+function startQuiz() {
+  const queue = buildQuiz(store.settings.mode);
+  if (!queue.length) { toast('还没有已学卡片——先用跟打/默写把学习进度推起来，再来刷题'); return; }
+  quiz = { queue: queue, idx: 0, correct: 0, wrong: 0, combo: 0, maxCombo: 0,
+    startTs: Date.now(), answered: false, wrongList: [], over: false };
+  $('viewHome').classList.add('hidden');
+  $('viewPractice').classList.add('hidden');
+  $('viewSelect').classList.remove('hidden');
+  $('qResult').classList.add('hidden');
+  $('qCard').classList.remove('hidden');
+  renderQuizQ();
+}
+/* 渲染当前题：挖空前 30 后 34 字为可见上下文 */
+function renderQuizQ() {
+  const q = quiz.queue[quiz.idx];
+  quiz.answered = false;
+  $('qTopic').textContent = q.card.topic;
+  $('qPos').textContent = '第 ' + (quiz.idx + 1) + ' / ' + quiz.queue.length + ' 题' +
+    (q.redo ? ' · 错题重做' : '') + ' · ' + (q.card.mode === 'fw' ? '框架' : '全文') +
+    ' · ' + (q.src || '');
+  const t = q.card.target;
+  const ctxBefore = 30, ctxAfter = 34;
+  const from = Math.max(0, q.start - ctxBefore);
+  const to = Math.min(t.length, q.end + ctxAfter);
+  $('qText').innerHTML =
+    (from > 0 ? '<span class="q-ctx">…</span>' : '') +
+    esc(t.slice(from, q.start)) +
+    '<span class="q-blank" id="qBlank">' + '　　　　' + '</span>' +
+    esc(t.slice(q.end, to)) +
+    (to < t.length ? '<span class="q-ctx">…</span>' : '');
+  const box = $('qChoices');
+  box.innerHTML = '';
+  q.choices.forEach(function (ch, i) {
+    const b = document.createElement('button');
+    b.className = 'q-choice';
+    b.innerHTML = '<span class="qc-idx">' + 'ABCD'[i] + '</span>' + esc(ch);
+    b.onclick = function () { onQuizChoice(i); };
+    box.appendChild(b);
+  });
+}
+function renderQuizCombo(popIt) {
+  const el = $('qCombo');
+  el.textContent = quiz.combo >= 2 ? '连击 ×' + quiz.combo : '';
+  if (popIt && quiz.combo >= 2) {
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+  }
+}
+function onQuizChoice(i) {
+  if (!quiz || quiz.answered || quiz.over) return;
+  quiz.answered = true;
+  const q = quiz.queue[quiz.idx];
+  const ok = q.choices[i] === q.text;
+  const btns = $('qChoices').children;
+  Array.prototype.forEach.call(btns, function (b, bi) {
+    b.disabled = true;
+    if (q.choices[bi] === q.text) b.classList.add('correct');
+  });
+  const blank = $('qBlank');
+  blank.textContent = q.text;
+  if (ok) {
+    quiz.correct++; quiz.combo++;
+    quiz.maxCombo = Math.max(quiz.maxCombo, quiz.combo);
+    blank.classList.add('ok');
+    const key = q.card.id + ':' + q.start;
+    const rec = store.selectStats.byQ[key] || (store.selectStats.byQ[key] = { ok: 0 });
+    rec.ok++;
+    saveStore();
+    renderQuizCombo(true);
+    setTimeout(nextQuizQ, 650);
+  } else {
+    btns[i].classList.add('wrong');
+    blank.classList.add('no');
+    quiz.combo = 0; quiz.wrong++;
+    quiz.wrongList.push(q);
+    if (!q.redo) {
+      quiz.queue.push({ card: q.card, start: q.start, end: q.end, text: q.text,
+        choices: quizChoices(q.text, kwWordPool(null)), redo: true, src: q.src, pri: q.pri });
+    }
+    renderQuizCombo(false);
+    setTimeout(nextQuizQ, 1500);
+  }
+}
+function nextQuizQ() {
+  if (!quiz || quiz.over) return;
+  quiz.idx++;
+  if (quiz.idx >= quiz.queue.length) endQuiz();
+  else renderQuizQ();
+}
+function endQuiz() {
+  quiz.over = true;
+  const total = quiz.correct + quiz.wrong;
+  const acc = total ? quiz.correct / total : 0;
+  const ms = Date.now() - quiz.startTs;
+  const d = dailyRec(todayStr());
+  d.select = (d.select || 0) + total;
+  d.selectOk = (d.selectOk || 0) + quiz.correct;
+  addRecord({ t: Date.now(), id: 'quiz', m: store.settings.mode, meth: 'select', hint: '',
+    peek: false, acc: acc, chars: total, errs: quiz.wrong, ms: ms, fz: 0 });
+  saveStore();
+  $('qCard').classList.add('hidden');
+  $('qCombo').textContent = '';
+  $('qBig').textContent = Math.round(acc * 100) + '%';
+  $('qBig').style.color = acc >= 0.9 ? 'var(--green)' : acc >= 0.7 ? 'var(--accent)' : 'var(--bad)';
+  $('qLine').textContent = total + ' 题答对 ' + quiz.correct + ' · 最高连击 ' + quiz.maxCombo +
+    ' · 用时 ' + fmtTime(ms) + (total >= QUIZ_N && quiz.wrong === 0 ? ' · 全对，漂亮！' : '');
+  const mix = {};
+  quiz.queue.forEach(function (q) {
+    if (q.redo) return;
+    mix[q.src || ''] = (mix[q.src || ''] || 0) + 1;
+  });
+  const mixTxt = Object.keys(mix).map(function (k) { return k + ' ' + mix[k]; }).join(' · ');
+  $('qLine').textContent += (mixTxt ? '\n本组抽题：' + mixTxt : '');
+  const seen = {};
+  $('qWrong').innerHTML = quiz.wrongList.length
+    ? '<b>错题回顾：</b>' + quiz.wrongList.filter(function (q) {
+        const k = q.card.id + ':' + q.start;
+        if (seen[k]) return false; seen[k] = 1; return true;
+      }).map(function (q) {
+        const t = q.card.target;
+        return '<div class="qw-item">…' + esc(t.slice(Math.max(0, q.start - 14), q.start)) +
+          '<span class="qw-ans">' + esc(q.text) + '</span>' + esc(t.slice(q.end, q.end + 14)) + '…</div>';
+      }).join('')
+    : '';
+  $('qResult').classList.remove('hidden');
+}
+function quitQuiz(record) {
+  if (!quiz) return;
+  const total = quiz.correct + quiz.wrong;
+  if (record && total > 0 && !quiz.over) {
+    const acc = quiz.correct / total;
+    const d = dailyRec(todayStr());
+    d.select = (d.select || 0) + total;
+    d.selectOk = (d.selectOk || 0) + quiz.correct;
+    addRecord({ t: Date.now(), id: 'quiz', m: store.settings.mode, meth: 'select', hint: '',
+      peek: false, acc: acc, chars: total, errs: quiz.wrong, ms: Date.now() - quiz.startTs, fz: 0 });
+    saveStore();
+  }
+  quiz = null;
+  $('viewSelect').classList.add('hidden');
+  $('viewHome').classList.remove('hidden');
+  renderHome();
+}
+/* 卡片切换：直接跳到上一张/下一张，未完成的卡不计成绩 */
+function navCard(delta) {
+  if (!session) return;
+  if (!$('overlay').classList.contains('hidden')) return;   // 成绩弹层打开时不切换
+  const ni = session.idx + delta;
+  if (ni < 0 || ni >= session.queue.length) return;
+  savePending(false);
+  session.idx = ni;
+  loadCard();
+  toast('已切换到第 ' + (session.idx + 1) + ' / ' + session.queue.length + ' 张（切换不计成绩）');
+}
+/* 原文字号：手动选择全局持久；未手动选择时，超长卡（≥160 字）自动缩为小字一屏多见几行 */
+const FS_LONG = 160;
+function effectiveFs(card) {
+  if (store.settings.fsAuto === false) return store.settings.fs || 'm';
+  return (card && card.target.length >= FS_LONG) ? 's' : (store.settings.fs || 'm');
+}
+function applyFs(fs) {
+  const w = $('pTextWrap');
+  w.classList.remove('fs-s', 'fs-l');
+  if (fs === 's') w.classList.add('fs-s');
+  else if (fs === 'l') w.classList.add('fs-l');
+  ['fontSeg', 'fontSeg2'].forEach(function (id) {
+    const seg = $(id);
+    if (seg) Array.prototype.forEach.call(seg.children, function (b) {
+      b.classList.toggle('on', b.dataset.fs === fs);
+    });
+  });
+}
+function loadCard(fadeIdx, keepSeed) {
+  const card = session.queue[session.idx];
+  const skip = !!store.settings.skipPunct;
+  const method = session.method;
+  const fz = method === 'follow' ? (fadeIdx != null ? fadeIdx : (store.settings.fadeLevel || 0)) : 0;
+  /* 随机隐藏：每轮新种子（换卡/再打一遍都换），同轮内切档位沿用同一种子——升档只增不减 */
+  const randOn = !!(store.settings.randomMask && method === 'follow' && fz > 0);
+  const maskSeed = randOn
+    ? ((keepSeed && cur && cur.card === card && cur.maskSeed != null)
+        ? cur.maskSeed
+        : ((Date.now() ^ (session.idx << 7) ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0))
+    : null;
+  const fil = fillerMask(card.target);
+  cur = {
+    card: card, method: method, lane: buildLanes(card.target, skip, fil), filler: fil,
+    val: '', startTs: 0, endTs: 0, finished: false, peeked: false,
+    fadeIdx: fz, maskSeed: maskSeed,
+    masked: pickMask(card, FADE_STEPS[fz], maskSeed != null ? { random: true, seed: maskSeed } : null),
+    lastAcc: null, lastActTs: Date.now(), rvCount: 0
+  };
+  $('pTopic').textContent = card.topic;
+  $('pPos').textContent = (card.bi >= 0
+    ? '第 ' + (card.bi + 1) + ' / ' + DATA[card.ti].blocks.length + ' 块 · ' : '整题 · ') +
+    '卡片 ' + (session.idx + 1) + ' / ' + session.queue.length;
+  $('btnPrev').disabled = session.idx <= 0;
+  $('btnNavNext').disabled = session.idx >= session.queue.length - 1;
+  $('fadeRow').classList.toggle('hidden', method !== 'follow');
+  Array.prototype.forEach.call($('fadeSeg').children, function (b) {
+    b.classList.toggle('on', Number(b.dataset.fz) === fz);
+  });
+  applyFs(effectiveFs(card));
+  $('pBadge').textContent = (card.mode === 'fw'
+    ? (card.bi >= 0 ? '框架' : '框架·整题串背')
+    : (card.bi >= 0 ? '全文' : '全文·整题串背')) +
+    (method === 'recall' ? ' · 默写' : (fz > 0 ? ' · 渐隐' + fadePctText(fz) : ''));
+  $('pLevel').textContent = levelBadge(store.cards[card.id]);
+
+  const hints = [];
+  if (card.logic) hints.push('<span class="hint-chip logic"><b>背诵逻辑</b>' + esc(card.logic) + '</span>');
+  if (card.law) hints.push('<span class="hint-chip law"><b>法条</b>' + esc(card.law) + '</span>');
+  card.notes.forEach(function (n) { hints.push('<span class="hint-chip note"><b>备注</b>' + esc(n) + '</span>'); });
+  if (card.skCuts && card.skCuts.length) hints.push('<span class="hint-chip note"><b>骨架卡</b>「⋯」处省略了「一方面/即/既要」等展开句，完整内容见「全文·整题串背」卡</span>');
+  $('pHints').innerHTML = hints.join('');
+
+  const kwSet = new Set();
+  card.kws.forEach(function (k) { for (let i = k.start; i < k.end; i++) kwSet.add(i); });
+  const cutSet = new Set(card.skCuts || []);
+  const box = $('pText');
+  box.innerHTML = '';
+  cur.spans = [];
+  const brk = lineBreaksOf(card.target);
+  for (let i = 0; i < card.target.length; i++) {
+    if (i > 0 && brk.has(i)) box.appendChild(document.createElement('br'));
+    if (cutSet.has(i)) {
+      const mk = document.createElement('span');
+      mk.className = 'sk-cut'; mk.textContent = '⋯';
+      mk.title = '骨架卡在此省略了「一方面/即/既要」等展开句，全文见「全文·整题串背」卡';
+      box.appendChild(mk);
+    }
+    const s = document.createElement('span');
+    s.className = 'ch' + (kwSet.has(i) ? ' kw' : '') + (cur.filler.has(i) ? ' ig' : '');
+    s.textContent = card.target[i];
+    if (cur.masked.has(i) && !cur.filler.has(i)) { s.textContent = '□'; s.classList.add('mask'); }
+    box.appendChild(s);
+    cur.spans.push(s);
+  }
+  if (cutSet.has(card.target.length)) {
+    const mk = document.createElement('span');
+    mk.className = 'sk-cut'; mk.textContent = '⋯';
+    mk.title = '骨架卡在此省略了「一方面/即/既要」等展开句，全文见「全文·整题串背」卡';
+    box.appendChild(mk);
+  }
+
+  const inp = $('pInput');
+  inp.value = '';
+  inp.readOnly = false;
+  inp.style.height = 'auto';
+  if (method === 'recall') {
+    const pref = store.settings.recallHint || 'auto';
+    const rec0 = store.cards[card.id];
+    const hint = pref !== 'auto' ? pref : hintByLevel(rec0 ? rec0.level : 0);
+    cur.hint = hint;
+    inp.removeAttribute('maxlength');
+    inp.placeholder = '凭记忆默写本题内容…写完点「对比原文」';
+    $('rcLevel').textContent = HINT_NAMES[hint] + (pref === 'auto' ? ' · 按熟练度自动' : ' · 手动指定');
+    if (hint === 'blind') {
+      $('rcSkelWrap').classList.add('hidden');
+      $('rcSub').textContent = '原文完全隐藏，凭记忆默写完整内容';
+      $('pTip').innerHTML = '闭卷默写；想不起来可「偷看原文」（计为开卷），写完点<b>对比原文</b>或按 <kbd>Ctrl+Enter</kbd>。';
+    } else {
+      const vis = buildHintMask(card, hint);
+      if (cur.filler.size) for (let i = 0; i < card.target.length; i++) if (cur.filler.has(i)) vis[i] = true;
+      const kwSet = new Set();
+      card.kws.forEach(function (k) { for (let i = k.start; i < k.end; i++) kwSet.add(i); });
+      const sk = $('rcSkel');
+      sk.innerHTML = '';
+      const brk = lineBreaksOf(card.target);
+      for (let i = 0; i < card.target.length; i++) {
+        if (i > 0 && brk.has(i)) sk.appendChild(document.createElement('br'));
+        if (cutSet.has(i)) {
+          const mk = document.createElement('span');
+          mk.className = 'sk-cut'; mk.textContent = '⋯';
+          mk.title = '骨架卡在此省略了展开句，全文见「全文·整题串背」卡';
+          sk.appendChild(mk);
+        }
+        const s = document.createElement('span');
+        if (vis[i]) {
+          s.textContent = card.target[i];
+          if (cur.filler.has(i)) s.className = 'ig';
+          else if (hint === 'kw' && kwSet.has(i)) s.className = 'kw';
+        } else {
+          s.textContent = '·';
+          s.className = 'dot';
+        }
+        sk.appendChild(s);
+      }
+      $('rcSkelWrap').classList.remove('hidden');
+      $('rcSub').textContent = hint === 'kw'
+        ? '绿色为关键词提示，「·」个数即空缺字数'
+        : '每句仅示首字，「·」为待补内容';
+      $('pTip').innerHTML = '对照上方提示回忆整句；写完点<b>对比原文</b>或按 <kbd>Ctrl+Enter</kbd>。';
+    }
+    $('recallCover').classList.remove('hidden');
+    $('pTextWrap').classList.add('hidden');
+    $('recallActions').classList.remove('hidden');
+    $('pBarWrap').classList.add('hidden');
+  } else {
+    inp.maxLength = skip ? cur.lane.length * 2 + 60 : cur.lane.length + 12;
+    inp.placeholder = '在这里跟打原文…（支持任意中文输入法，标点可打可不打）';
+    $('recallCover').classList.add('hidden');
+    $('pTextWrap').classList.remove('hidden');
+    $('recallActions').classList.add('hidden');
+    $('pBarWrap').classList.remove('hidden');
+    $('pTip').innerHTML = (fz > 0
+      ? '渐隐跟打：已隐藏 <b>' + fadePctText(fz) + '</b> 文字，「□」处凭记忆打——打对亮绿、打错亮红；<b>错过的地方本卡内保持标红</b>，改对也不翻绿，方便定位老背错点。'
+      : '') +
+      (store.settings.fillerOn && fillerWords().length
+        ? ' 关联词<b>不判定</b>：灰色的字（' + esc(fillerWords().join('/')) + '）可打可不打。' +
+          (protectWords().length ? '保护词（' + esc(protectWords().join('/')) + '）内的同字照常判定。' : '')
+        : '') +
+      (skip
+        ? '标点<b>不判定</b>：可打可不打，打了也不计分；打错不阻断，打完统一判分。<b>句末符号（句号等）必须打出才会结束本卡。</b>'
+        : '当前需<b>完整输入标点</b>；打错不阻断，打完统一判分。');
+  }
+  $('pBar').style.width = '0%';
+  hideDiff();
+  if (method === 'recall') renderRecallStats(); else renderLiveStats();
+  $('overlay').classList.add('hidden');
+  $('pTextWrap').scrollTop = 0;
+  inp.focus();
+}
+
+function sync() {
+  if (!cur || cur.finished) return;
+  const inp = $('pInput');
+  autoGrow(inp);
+  const skip = !!store.settings.skipPunct;
+  const val = normalizeRaw(inp.value, skip, activeFillerRe());
+  if (val.length && !cur.startTs) cur.startTs = Date.now();
+  cur.val = val;
+  if (cur.method === 'recall') {
+    /* 错过就记下（按对齐位置，多打的「的」不记）：默写打错过的位置，最终对比时即使命中也标红 */
+    if (!cur.everWrong) cur.everWrong = new Set();
+    /* 题号数字不判定（与 compareRecall 一致）：两侧剔除后再对齐 */
+    const laneR = cur.lane.filter(function (i) { return !/[0-9０-９]/.test(cur.card.target[i]); });
+    const valR = val.replace(/[0-9０-９]/g, '');
+    const aliR = alignDe(cur.card.target, laneR, valR);
+    let prevErrR = false;
+    for (let j = 0; j < valR.length; j++) {
+      const pi = aliR.map[j];
+      if (pi < 0) continue;
+      const ti = laneR[pi];
+      if (valR[j] !== cur.card.target[ti]) {
+        if (!prevErrR) cur.everWrong.add(ti);   /* 只记错误起点 */
+        prevErrR = true;
+      } else prevErrR = false;
+    }
+    renderRecallStats();
+    return;
+  }
+  const st = computeStats(cur.card.target, cur.lane, val, inp.value.replace(/\s/g, '').slice(-1) || undefined);
+  paintChars(val, st);
+  renderLiveStats(st);
+  if (st.done) finishCard(st);
+}
+
+function renderRecallStats() {
+  if (!cur) return;
+  const val = normalizeRaw($('pInput').value, !!store.settings.skipPunct, activeFillerRe());
+  const ms = cur.startTs ? (cur.finished ? cur.endTs : Date.now()) - cur.startTs : 0;
+  $('pStats').innerHTML =
+    '已打 <b>' + val.length + '</b> 字' +
+    ' · 用时 <b>' + fmtTime(ms) + '</b>' +
+    ' · 提示 <b>' + HINT_NAMES[cur.hint] + '</b>' +
+    (cur.peeked ? ' · <b>已开卷</b>' : '');
+}
+
+/* 默写模式：对比原文，LCS 对齐算覆盖率，漏打标红 */
+function compareRecall() {
+  if (!cur || cur.method !== 'recall' || cur.finished) return;
+  const inp = $('pInput');
+  const skip = !!store.settings.skipPunct;
+  let val = normalizeRaw(inp.value, skip, activeFillerRe());
+  if (!val.length) { toast('还没写内容；先默写，或点「偷看原文」'); return; }
+  if (!cur.startTs) cur.startTs = Date.now();
+  cur.finished = true;
+  cur.endTs = Date.now();
+  inp.readOnly = true;
+
+  const target = cur.card.target;
+  /* 题号数字（（1）/1.）不判定：从原文与输入两侧剔除，漏打题号不计漏字 */
+  const DIGIT = /[0-9０-９]/;
+  const lane = cur.lane.filter(function (i) { return !DIGIT.test(target[i]); });
+  val = val.replace(/[0-9０-９]/g, '');
+  if (!val.length) val = ' ';
+  const T = lane.map(function (i) { return target[i]; });
+  const hit = lcsMarks(T, val);
+  let matched = 0;
+  hit.forEach(function (h) { if (h) matched++; });
+  const missing = T.length - matched;
+  const extra = Math.max(0, val.length - matched);
+  const coverage = T.length ? matched / T.length : 0;
+  const ms = Math.max(cur.endTs - cur.startTs, 1000);
+  const spd = Math.round(val.length / (ms / 60000));
+
+  const rec = cardRec(cur.card.id);
+  const prevLv = rec.level;
+  if (!cur.peeked) {
+    if (coverage >= 0.95) rec.level = Math.min(5, rec.level + 1);
+    else if (coverage < 0.85) rec.level = Math.max(0, rec.level - 1);
+  }
+  rec.count++; rec.lastTs = Date.now(); rec.lastAcc = coverage; rec.lastDay = todayStr();
+  scheduleReview(rec, coverage, !!cur.peeked, cur.card.id);
+
+  const d = dailyRec(todayStr());
+  d.done++; d.chars += T.length; d.errors += missing; d.ms += ms;
+  session.done++; session.chars += T.length; session.errors += missing; session.ms += ms;
+  addRecord({ t: Date.now(), id: cur.card.id, m: cur.card.mode, meth: 'recall', hint: cur.hint,
+    peek: !!cur.peeked, acc: coverage, chars: T.length, errs: missing, ms: ms, fz: 0 });
+  saveStore();
+  $('pLevel').textContent = levelBadge(rec);
+
+  // 原文 diff 上色：命中绿、漏打红、标点灰；打错过的地方即使最终命中也保持标红
+  const hitByIndex = new Array(target.length).fill(undefined);
+  lane.forEach(function (ti, j) { hitByIndex[ti] = hit[j]; });
+  const wrap = $('pTextWrap');
+  $('recallCover').classList.add('hidden');
+  wrap.classList.remove('hidden');
+  wrap.scrollTop = 0;
+  for (let i = 0; i < target.length; i++) {
+    const s = cur.spans[i];
+    s.classList.remove('ok', 'bad', 'auto', 'cur', 'hit', 'miss');
+    if (hitByIndex[i] === undefined) s.classList.add('auto');
+    else s.classList.add(hitByIndex[i] && !(cur.everWrong && cur.everWrong.has(i)) ? 'hit' : 'miss');
+  }
+
+  const isLast = session.idx >= session.queue.length - 1;
+  $('rTitle').textContent = cur.peeked ? '开卷完成'
+    : coverage >= 0.95 ? '默写得很漂亮'
+    : coverage >= 0.85 ? '默写完成' : '还需巩固';
+  $('rSub').textContent = cur.card.topic +
+    (cur.card.bi >= 0 ? ' · 第 ' + (cur.card.bi + 1) + ' 块' : (cur.card.mode === 'fw' ? ' · 整题框架' : ' · 整题全文')) +
+    ' · ' + HINT_NAMES[cur.hint];
+  $('rGrid').innerHTML =
+    rcell(fmtTime(ms), '用时') +
+    rcell(spd, '字 / 分钟') +
+    rcell(Math.round(coverage * 100) + '%', '覆盖率', coverage >= 0.95 ? 'good' : coverage < 0.85 ? 'warn' : '') +
+    rcell(missing, '漏打字数', missing ? 'warn' : 'good');
+  let html = '';
+  if (extra) html += '<div class="r-empty">多打 / 错位 ' + extra + ' 字（未按原文顺序命中的输入）。</div>';
+  if (missing) {
+    const runs = [];
+    let start = -1;
+    lane.forEach(function (ti, j) {
+      if (!hit[j]) { if (start < 0) start = j; }
+      else if (start >= 0) { runs.push([start, j]); start = -1; }
+    });
+    if (start >= 0) runs.push([start, lane.length]);
+    html += runs.map(function (r) {
+      const seg = lane.slice(r[0], r[1]).map(function (i) { return target[i]; }).join('');
+      return '<div class="r-err"><span class="pos">漏打 ' + (r[1] - r[0]) + ' 字</span>' +
+        '<span class="miss-text">' + esc(seg) + '</span></div>';
+    }).join('');
+    const missIdx = {};
+    lane.forEach(function (ti, j) { if (!hit[j]) missIdx[ti] = 1; });
+    const fixedRecall = everWrongList(missIdx);
+    if (fixedRecall.length) html += everWrongBlock('另有', fixedRecall);
+  } else {
+    const ew = everWrongList();
+    html += ew.length
+      ? everWrongBlock('原文全部命中，但有', ew)
+      : '<div class="r-empty">原文全部命中，一字不漏。</div>';
+  }
+  $('rErrs').innerHTML = html;
+  showRecallDiff(target, hitByIndex, val);
+  const adv = $('rAdv');
+  adv.textContent = levelLine(rec, rec.level - prevLv, !!cur.peeked);
+  adv.classList.remove('hidden');
+  if (cur.peeked) {
+    adv.textContent += ' 开卷完成不计升档，建议明天闭卷再测一次。';
+  } else if (coverage < 0.85) {
+    adv.textContent += ' ' + (cur.hint === 'kw'
+      ? '有关键词提示仍未到 85%，建议先回「跟打练习」把这块打熟，再来默写。'
+      : '覆盖率低于 85%，熟练度已下降；红色部分就是漏打内容，建议「再打一遍」。');
+  } else if (coverage < 0.95) {
+    adv.textContent += ' 距「熟练 +1」（95%）还差一点，红色高亮就是漏打的部分。';
+  }
+
+  $('btnNext').innerHTML = isLast ? '完成本组 <kbd>Enter</kbd>' : '下一张 <kbd>Enter</kbd>';
+  $('btnNext').classList.remove('hidden');
+  $('btnRedo').classList.remove('hidden');
+  $('btnEnd').textContent = '结束返回';
+  $('overlay').classList.remove('hidden');
+  $('btnNext').focus();
+}
+
+/* 弹层「原文对照」：原文高亮 diff + 我的默写原样展示 */
+function showRecallDiff(target, hitByIndex, normVal) {
+  const diffBox = $('rDiff');
+  let tHtml = '';
+  const brk = lineBreaksOf(target);
+  for (let i = 0; i < target.length; i++) {
+    if (i > 0 && brk.has(i)) tHtml += '<br>';
+    const ch = esc(target[i]);
+    if (hitByIndex[i] === undefined) tHtml += '<span class="auto">' + ch + '</span>';
+    else tHtml += hitByIndex[i] ? '<span class="hit">' + ch + '</span>' : '<span class="miss">' + ch + '</span>';
+  }
+  const mine = $('pInput').value.replace(/\s/g, '');
+  $('rdBody').innerHTML =
+    '<div class="rd-label">原文（绿=已命中 · 红=漏打/打错过 · 灰=标点；错过的地方改对也保持标红）</div>' +
+    '<div class="rd-text">' + tHtml + '</div>' +
+    '<div class="rd-label">我的默写（' + normVal.length + ' 字，原样）</div>' +
+    '<div class="rd-text">' + (mine ? esc(mine) : '<span class="rd-empty-line">（空）</span>') + '</div>';
+  $('rdToggle').textContent = '收起';
+  $('rdBody').classList.remove('hidden');
+  diffBox.classList.remove('hidden');
+}
+function hideDiff() {
+  $('rDiff').classList.add('hidden');
+}
+
+/* ================= 练习记录页 ================= */
+function accClass(a) { return a >= 0.95 ? 'acc-good' : a >= 0.85 ? 'acc-mid' : 'acc-bad'; }
+function cardName(c) {
+  return c.topic + (c.bi >= 0
+    ? ' · 第 ' + (c.bi + 1) + ' 块'
+    : (c.mode === 'fw' ? ' · 整题框架' : ' · 整题全文'));
+}
+function renderRecords() {
+  const rs = store.records;
+  let totCards = 0, totChars = 0, totMs = 0, sumAcc = 0, nAcc = 0;
+  rs.forEach(function (r) { totCards++; totChars += r.chars; totMs += r.ms; sumAcc += r.acc; nAcc++; });
+  const dailyDone = Object.keys(store.daily).filter(function (k) { return store.daily[k].done > 0; });
+  $('recTotal').innerHTML =
+    rcell(totCards, '累计卡次') +
+    rcell(totChars, '累计字数') +
+    rcell(nAcc ? Math.round(sumAcc / nAcc * 100) + '%' : '—', '平均正确/覆盖') +
+    rcell(fmtTime(totMs), '累计用时') +
+    rcell(dailyDone.length, '练习天数');
+  const tab = store._recTab || 'days';
+  Array.prototype.forEach.call($('recSeg').children, function (b) {
+    b.classList.toggle('on', b.dataset.rt === tab);
+  });
+  const byId = {};
+  CARDS.forEach(function (c) { byId[c.id] = c; });
+  const box = $('recBody');
+  if (tab === 'days') {
+    if (!rs.length) { box.innerHTML = '<p class="rd-empty-line">还没有练习记录，去首页开始第一张卡吧。</p>'; return; }
+    const groups = {};
+    rs.forEach(function (r) {
+      const day = todayStr(new Date(r.t));
+      (groups[day] = groups[day] || []).push(r);
+    });
+    const days = Object.keys(groups).sort().reverse();
+    box.innerHTML = days.map(function (day) {
+      const g = groups[day];
+      const acc = g.reduce(function (s, r) { return s + r.acc; }, 0) / g.length;
+      const ms = g.reduce(function (s, r) { return s + r.ms; }, 0);
+      const items = g.slice().reverse().map(function (r) {
+        const c = byId[r.id];
+        return '<div class="rec-item">' +
+          '<span class="ri-name">' + (r.meth === 'select' ? '选择快刷' : (c ? esc(cardName(c)) : r.id)) + '</span>' +
+          '<span class="ri-badge">' + (r.m === 'fw' ? '框架' : '全文') + '·' +
+            (r.meth === 'select'
+              ? '选择'
+              : r.meth === 'recall'
+              ? '默写' + (r.hint ? '·' + HINT_NAMES[r.hint] : '') + (r.peek ? '·开卷' : '')
+              : '跟打' + (r.fz ? '·渐隐' + (r.fz >= 100 ? '全盲' : r.fz + '%') : '')) + '</span>' +
+          '<span class="ri-acc ' + accClass(r.acc) + '">' + Math.round(r.acc * 100) + '%</span>' +
+          '<span class="ri-meta">' + (r.meth === 'select'
+            ? r.chars + ' 题 · 错 ' + r.errs + ' · '
+            : (r.errs ? r.errs + ' 错/漏字 · ' : '')) + fmtTime(r.ms) + ' · ' +
+            new Date(r.t).toTimeString().slice(0, 5) + '</span>' +
+          '</div>';
+      }).join('');
+      return '<div class="rec-day"><div class="rec-day-head"><b>' + day + '</b>' +
+        '<span class="muted">' + g.length + ' 条 · ' + g.reduce(function (s, r) { return s + r.chars; }, 0) +
+        ' 字/题 · 平均 ' + Math.round(acc * 100) + '% · ' + fmtTime(ms) + '</span></div>' + items + '</div>';
+    }).join('');
+  } else {
+    const now = Date.now();
+    const DAY = 86400000;
+    let html = '';
+    DATA.forEach(function (t, ti) {
+      html += '<div class="rec-topic">' + esc(t.title) + '</div>';
+      CARDS.filter(function (c) { return c.ti === ti; }).forEach(function (c) {
+        const r = store.cards[c.id];
+        if (!r || !r.count) {
+          html += '<div class="rec-card-row never"><span class="ri-name">' + esc(cardName(c)) +
+            '</span><span class="lv">未练</span><span class="ri-meta">' +
+            (c.bi >= 0 ? '第 ' + (c.bi + 1) + ' 块' : (c.mode === 'fw' ? '整题框架' : '整题全文')) + ' · ' + c.target.length + ' 字</span></div>';
+          return;
+        }
+        const daysAgo = r.lastTs ? Math.floor((now - r.lastTs) / DAY) : 999;
+        const today = todayStr();
+        let overdue = false, dueTag = '';
+        if (r.dueDay) {
+          const du = diffDays(r.dueDay, today);
+          if (du <= 0) {
+            overdue = true;
+            dueTag = '<span class="tag-forgot">' + (du === 0 ? '今日到期' : '已逾期 ' + (-du) + ' 天') + '</span>';
+          } else {
+            dueTag = '<span class="ri-due">' + du + ' 天后复习</span>';
+          }
+        }
+        html += '<div class="rec-card-row' + (overdue ? ' forgot' : '') + '">' +
+          '<span class="ri-name">' + esc(cardName(c)) + '</span>' +
+          '<span class="lv">' + '★'.repeat(r.level) + '☆'.repeat(3 - Math.min(3, r.level)) + '</span>' +
+          dueTag +
+          '<span class="ri-acc ' + accClass(r.lastAcc) + '">' +
+            (r.lastAcc >= 0 ? Math.round(r.lastAcc * 100) + '%' : '—') + '</span>' +
+          '<span class="ri-meta">练 ' + r.count + ' 次 · 最近 ' + (daysAgo === 0 ? '今天' : daysAgo + ' 天前') + '</span>' +
+          '</div>';
+      });
+    });
+    box.innerHTML = html;
+  }
+}
+function openRecords() {
+  $('viewHome').classList.add('hidden');
+  $('viewPractice').classList.add('hidden');
+  $('viewRecords').classList.remove('hidden');
+  renderRecords();
+  window.scrollTo(0, 0);
+}
+
+function paintChars(val, st) {
+  const spans = cur.spans, target = cur.card.target, lane = cur.lane;
+  const map = st && st.map ? st.map : null;
+  const nextPos = st && st.nextI != null ? st.nextI : Math.min(val.length, lane.length);
+  /* 错过就记下：本卡内打错过的位置改对后仍保持标红；多打的「的」不记 */
+  if (!cur.everWrong) cur.everWrong = new Set();
+  for (let i = 0; i < target.length; i++) {
+    spans[i].classList.remove('ok', 'bad', 'auto', 'cur');
+  }
+  let lastPos = -1, prevErr = false;
+  for (let j = 0; j < val.length; j++) {
+    const pi = map ? map[j] : (j < lane.length ? lane[j] : -1);
+    if (pi < 0) continue;   /* 多打的/待定的「的」：不着色 */
+    const i = lane[pi];
+    if (cur.masked && cur.masked.has(i) && spans[i].classList.contains('mask')) {
+      spans[i].textContent = target[i];
+      spans[i].classList.remove('mask');
+    }
+    if (val[j] === target[i] && !cur.everWrong.has(i)) {
+      spans[i].classList.add('ok');
+      prevErr = false;
+    } else {
+      spans[i].classList.add('bad');
+      if (val[j] !== target[i]) {
+        if (!prevErr) cur.everWrong.add(i);   /* 只记错误起点，错位连带的不记 */
+        prevErr = true;
+      }
+    }
+    lastPos = i;
+  }
+  for (let i = 0; i < target.length; i++) {
+    if (i <= lastPos && !spans[i].classList.contains('ok') && !spans[i].classList.contains('bad')) {
+      spans[i].classList.add('auto');
+    }
+  }
+  if (nextPos < lane.length) {
+    const cs = spans[lane[nextPos]];
+    cs.classList.add('cur');
+    const wrap = $('pTextWrap');
+    const top = cs.offsetTop - wrap.clientHeight / 2 + 20;
+    if (Math.abs(wrap.scrollTop - top) > 60) wrap.scrollTop = Math.max(0, top);
+  } else if (st && st.pendingFinal) {
+    /* 正文打完但句末符号未打：光标停在句末标点上，提示补打 */
+    const cs = spans[target.length - 1];
+    cs.classList.add('cur');
+    const wrap = $('pTextWrap');
+    const top = cs.offsetTop - wrap.clientHeight / 2 + 20;
+    if (Math.abs(wrap.scrollTop - top) > 60) wrap.scrollTop = Math.max(0, top);
+  }
+}
+
+function renderLiveStats(st) {
+  st = st || { typed: 0, correct: 0, acc: 0 };
+  const total = cur.lane.length;
+  const ms = cur.startTs ? (cur.finished ? cur.endTs : Date.now()) - cur.startTs : 0;
+  const spd = ms > 3000 ? Math.round(st.typed / (ms / 60000)) : 0;
+  $('pStats').innerHTML =
+    '进度 <b>' + st.typed + ' / ' + total + '</b> 字' +
+    ' · 正确率 <b>' + (st.typed ? Math.round(st.acc * 100) + '%' : '—') + '</b>' +
+    ' · 速度 <b>' + (spd || '—') + '</b> 字/分' +
+    ' · 用时 <b>' + fmtTime(ms) + '</b>';
+  $('pBar').style.width = (total ? st.typed / total * 100 : 0) + '%';
+}
+
+/* 卡壳提示：渐隐/全盲跟打时，打字已开始、5 秒无任何输入且当前字隐藏 → 亮出接下来 2 个字（浅蓝虚线，不影响成绩） */
+const STUCK_MS = 5000;
+function stuckTick() {
+  if (!cur || cur.finished || cur.method !== 'follow') return;
+  if (!store.settings.stuckHint || !cur.startTs || !cur.masked || !cur.masked.size) return;
+  if (Date.now() - cur.lastActTs < STUCK_MS) return;
+  const inp = $('pInput');
+  if (document.activeElement !== inp) return;
+  const j = cur.val.length;
+  if (j >= cur.lane.length) return;
+  const i0 = cur.lane[j];
+  if (!cur.spans[i0].classList.contains('mask')) return;
+  let revealed = 0;
+  const jEnd = Math.min(j + 2, cur.lane.length);
+  for (let j2 = j; j2 < jEnd; j2++) {
+    const i = cur.lane[j2];
+    const s = cur.spans[i];
+    if (!s.classList.contains('mask')) continue;
+    s.textContent = cur.card.target[i];
+    s.classList.remove('mask');
+    s.classList.add('rv');
+    revealed++;
+  }
+  if (revealed) {
+    cur.rvCount += revealed;
+    cur.lastActTs = Date.now();
+  }
+}
+setInterval(stuckTick, 500);
+
+function finishCard(st) {
+  cur.finished = true;
+  cur.endTs = Date.now();
+  cur.lastAcc = st.acc;
+  const inp = $('pInput');
+  inp.readOnly = true;
+  if (cur.masked) cur.masked.forEach(function (i) {
+    const s = cur.spans[i];
+    if (s.classList.contains('mask')) {
+      s.textContent = cur.card.target[i];
+      s.classList.remove('mask');
+    }
+  });
+
+  const ms = Math.max(cur.endTs - cur.startTs, 1000);
+  const acc = st.acc;
+  const spd = Math.round(cur.lane.length / (ms / 60000));
+
+  const rec = cardRec(cur.card.id);
+  const prevLv = rec.level;
+  if (acc >= 0.95) rec.level = Math.min(5, rec.level + 1);
+  else if (acc < 0.85) rec.level = Math.max(0, rec.level - 1);
+  rec.count++; rec.lastTs = Date.now(); rec.lastAcc = acc; rec.lastDay = todayStr();
+  scheduleReview(rec, acc, false, cur.card.id);
+
+  const d = dailyRec(todayStr());
+  d.done++; d.chars += cur.lane.length; d.errors += st.errs.length; d.ms += ms;
+  session.done++; session.chars += cur.lane.length; session.errors += st.errs.length; session.ms += ms;
+  addRecord({ t: Date.now(), id: cur.card.id, m: cur.card.mode, meth: 'follow', hint: '',
+    peek: false, acc: acc, chars: cur.lane.length, errs: st.errs.length, ms: ms,
+    fz: cur.fadeIdx > 0 ? (cur.fadeIdx >= 5 ? 100 : cur.fadeIdx * 20) : 0 });
+  saveStore();
+  $('pLevel').textContent = levelBadge(rec);
+
+  renderLiveStats(st);
+  showFollowDiff(st);
+
+  const isLast = session.idx >= session.queue.length - 1;
+  $('rTitle').textContent = acc >= 0.95 ? '打得很漂亮' : acc >= 0.85 ? '本卡完成' : '还需巩固';
+  $('rSub').textContent = cur.card.topic +
+    (cur.card.bi >= 0 ? ' · 第 ' + (cur.card.bi + 1) + ' 块' : (cur.card.mode === 'fw' ? ' · 整题框架' : ' · 整题全文')) +
+    (cur.fadeIdx > 0 ? ' · 渐隐' + fadePctText(cur.fadeIdx) : '');
+  $('rGrid').innerHTML =
+    rcell(fmtTime(ms), '用时') +
+    rcell(spd, '字 / 分钟') +
+    rcell(Math.round(acc * 100) + '%', '正确率', acc >= 0.95 ? 'good' : acc < 0.85 ? 'warn' : '') +
+    rcell(st.errs.length, '错误字数', st.errs.length ? 'warn' : 'good') +
+    (cur.rvCount ? rcell(cur.rvCount, '卡壳提示', '') : '');
+  const errBox = $('rErrs');
+  if (st.errs.length) {
+    const wrongIdx = {};
+    st.errs.forEach(function (e) { const ti = (e.i != null) ? e.i : cur.lane[e.j]; if (ti != null) wrongIdx[ti] = 1; });
+    const fixed = everWrongList(wrongIdx);
+    errBox.innerHTML = st.errs.map(function (e) {
+      return '<div class="r-err"><span class="pos">第 ' + (e.j + 1) + ' 个输入</span>' +
+        '<span class="exp">' + esc(e.exp) + '</span><span class="arrow">应为此字，你打的是</span>' +
+        '<span class="got">' + esc(e.got || ' ') + '</span></div>';
+    }).join('') + (fixed.length ? everWrongBlock('另有', fixed) : '');
+  } else {
+    const ew = everWrongList();
+    errBox.innerHTML = ew.length
+      ? everWrongBlock('提交时全对，但有', ew)
+      : '<div class="r-empty">全对，一个字都没错。</div>';
+  }
+  const adv = $('rAdv');
+  adv.textContent = levelLine(rec, rec.level - prevLv, false);
+  adv.classList.remove('hidden');
+  if (acc < 0.85) {
+    adv.textContent += ' 正确率低于 85%，熟练度已下降，建议「再打一遍」巩固后再继续。';
+  } else if (acc < 0.95) {
+    adv.textContent += ' 距「熟练 +1」（95%）还差一点，可以再打一遍，也可以继续推进。';
+  }
+  if (store.settings.fadeFollow !== false) {
+    const extra = acc >= 0.85
+      ? (cur.fadeIdx < 5
+        ? '渐隐跟打：再打一遍将隐藏至 ' + fadePctText(cur.fadeIdx + 1) + '。'
+        : '已到全盲档，再打一遍保持全盲——这就等于默写了。')
+      : (cur.fadeIdx > 0 ? '正确率不足 85%，渐隐档位保持 ' + fadePctText(cur.fadeIdx) + ' 不变。' : '');
+    if (extra) {
+      adv.textContent = (adv.classList.contains('hidden') ? '' : adv.textContent + ' ') + extra;
+      adv.classList.remove('hidden');
+    }
+  }
+
+  $('btnNext').innerHTML = isLast ? '完成本组 <kbd>Enter</kbd>' : '下一张 <kbd>Enter</kbd>';
+  $('btnNext').classList.remove('hidden');
+  $('btnRedo').classList.remove('hidden');
+  $('btnEnd').textContent = '结束返回';
+  $('overlay').classList.remove('hidden');
+  $('btnNext').focus();
+}
+function rcell(v, k, cls) {
+  return '<div class="r-cell ' + (cls || '') + '"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>';
+}
+/* 错过字收集：本卡内曾打错过的位置（排除 exclude 下标集），按原文顺序返回字符 */
+function everWrongList(exclude) {
+  if (!cur || !cur.everWrong || !cur.everWrong.size) return [];
+  const ex = exclude || {};
+  return Array.from(cur.everWrong).filter(function (i) { return !ex[i]; })
+    .sort(function (a, b) { return a - b; })
+    .map(function (i) { return cur.card.target[i]; });
+}
+/* 错过字提示块（结算弹层用） */
+function everWrongBlock(prefix, chars) {
+  return '<div class="r-empty">' + prefix + ' <b>' + chars.length + '</b> 个字中途打错过、后来改对（原文对照中标红）：「<b>' +
+    esc(chars.join('、')) + '</b>」——容易背错的位置，建议多看两眼。</div>';
+}
+
+/* 跟打模式弹层对照：原文高亮（绿=对 红=错 灰=标点/未到）+ 我的输入 */
+function showFollowDiff(st) {
+  let tHtml = '';
+  const brk = lineBreaksOf(cur.card.target);
+  for (let i = 0; i < cur.card.target.length; i++) {
+    if (i > 0 && brk.has(i)) tHtml += '<br>';
+    const cls = cur.spans[i].className.replace('ch', '').trim();
+    const ch = esc(cur.card.target[i]);
+    const m = cls.indexOf('bad') >= 0 ? 'miss' : cls.indexOf('ok') >= 0 ? 'hit' : 'auto';
+    tHtml += '<span class="' + m + '">' + ch + '</span>';
+  }
+  const mine = $('pInput').value.replace(/\s/g, '');
+  $('rdBody').innerHTML =
+    '<div class="rd-label">原文（绿=打对 · 红=打错 · 灰=标点；多打的「的」不计错）</div>' +
+    '<div class="rd-text">' + tHtml + '</div>' +
+    '<div class="rd-label">我的输入（' + st.typed + ' 字，原样）</div>' +
+    '<div class="rd-text">' + (mine ? esc(mine) : '<span class="rd-empty-line">（空）</span>') + '</div>';
+  $('rdToggle').textContent = '收起';
+  $('rdBody').classList.remove('hidden');
+  $('rDiff').classList.remove('hidden');
+}
+
+function nextCard() {
+  savePending(false);
+  session.idx++;
+  if (session.idx >= session.queue.length) {
+    showSessionSummary();
+    return;
+  }
+  loadCard();
+}
+function showSessionSummary() {
+  hideDiff();
+  savePending(true);
+  const acc = session.chars ? Math.round((1 - session.errors / session.chars) * 100) : 100;
+  $('rTitle').textContent = '本组完成';
+  $('rSub').textContent = session.name;
+  $('rGrid').innerHTML =
+    rcell(session.done, '完成卡片') +
+    rcell(session.chars, '总字数') +
+    rcell(acc + '%', '平均正确率', acc >= 95 ? 'good' : acc < 85 ? 'warn' : '') +
+    rcell(fmtTime(session.ms), '总用时');
+  $('rErrs').innerHTML = '<div class="r-empty">' +
+    (session.done ? '做得不错，功不唐捐。到期卡片会自动进入「到期复习」队列。' : '') + '</div>';
+  $('rAdv').classList.add('hidden');
+  $('btnNext').classList.add('hidden');
+  $('btnRedo').classList.add('hidden');
+  $('btnEnd').textContent = '返回首页';
+  $('overlay').classList.remove('hidden');
+  $('btnEnd').focus();
+}
+
+/* ================= 事件绑定 ================= */
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._tm);
+  toast._tm = setTimeout(function () { t.classList.remove('show'); }, 2400);
+}
+
+function bindEvents() {
+  Array.prototype.forEach.call($('modeSeg').children, function (b) {
+    b.onclick = function () {
+      store.settings.mode = b.dataset.mode;
+      saveStore();
+      renderHome();
+    };
+  });
+  Array.prototype.forEach.call($('methodSeg').children, function (b) {
+    b.onclick = function () {
+      store.settings.method = b.dataset.method;
+      saveStore();
+      renderHome();
+    };
+  });
+  Array.prototype.forEach.call($('hintSeg').children, function (b) {
+    b.onclick = function () {
+      store.settings.recallHint = b.dataset.hint;
+      saveStore();
+      renderHome();
+    };
+  });
+  $('btnRecords').onclick = openRecords;
+  $('btnRecBack').onclick = function () {
+    $('viewRecords').classList.add('hidden');
+    $('viewHome').classList.remove('hidden');
+  };
+  Array.prototype.forEach.call($('recSeg').children, function (b) {
+    b.onclick = function () {
+      store._recTab = b.dataset.rt;
+      renderRecords();
+    };
+  });
+  $('rdToggle').onclick = function () {
+    const body = $('rdBody');
+    const collapsed = body.classList.contains('hidden');
+    if (collapsed) { body.classList.remove('hidden'); this.textContent = '收起'; }
+    else { body.classList.add('hidden'); this.textContent = '展开'; }
+  };
+  $('btnSmart').onclick = function () {
+    if ((store.settings.method || 'follow') === 'select') { startQuiz(); return; }
+    const q = smartQueue(store.settings.mode);
+    if (!q.length) {
+      toast('当前模式卡片已全部掌握，可切换另一模式，或点主题卡重打巩固');
+      return;
+    }
+    startSession(q, '智能练习');
+  };
+  $('btnReview').onclick = function () {
+    const q = reviewQueue(store.settings.mode);
+    if (!q.length) { toast('当前没有到期或当日待巩固的卡片'); return; }
+    startSession(q, '到期复习');
+  };
+  $('btnQuizBack').onclick = function () { if (confirmExitQuiz()) quitQuiz(true); };
+  $('btnQuizHome').onclick = function () { quitQuiz(false); };
+  $('btnQuizAgain').onclick = function () { quitQuiz(false); startQuiz(); };
+  $('btnTask').onclick = function () {
+    const t = todayTask(store.settings.mode);
+    const q = t.due.concat(t.freshTake);
+    if (!q.length) { toast('今日任务已全部完成，明天再来或自由练习'); return; }
+    startSession(q, '今日任务');
+  };
+  $('examDate').value = store.settings.examDay || '';
+  $('examDate').onchange = function () {
+    store.settings.examDay = this.value || '';
+    if (store.settings.examDay) {
+      Object.keys(store.cards).forEach(function (id) { clampDue(store.cards[id], id); });
+    }
+    saveStore();
+    renderHome();
+    toast(store.settings.examDay
+      ? '考试日期已更新为 ' + store.settings.examDay + '，今日任务已重新倒排'
+      : '已清除考试日期，今日任务面板已隐藏');
+  };
+  $('btnBack').onclick = function () { if (confirmExitPractice()) endSession(true); };
+  $('btnEnd').onclick = function () { endSession(true); };
+  $('btnPrev').onclick = function () { navCard(-1); };
+  $('btnNavNext').onclick = function () { navCard(1); };
+  $('btnNext').onclick = nextCard;
+  $('btnRedo').onclick = function () {
+    let fade = 0;
+    if (session.method === 'follow') {
+      const base = cur ? (cur.fadeIdx != null ? cur.fadeIdx : 0) : (store.settings.fadeLevel || 0);
+      const up = (store.settings.fadeFollow !== false && cur && cur.finished &&
+        cur.lastAcc != null && cur.lastAcc >= 0.85) ? 1 : 0;
+      fade = Math.min(base + up, 5);
+    }
+    loadCard(fade);
+  };
+
+  $('optSkip').onchange = function () {
+    store.settings.skipPunct = this.checked;
+    saveStore();
+    toast(this.checked ? '标点不判定：可打可不打，不计入正确率' : '已开启标点判定：需要正确打出标点');
+  };
+  $('optFiller').onchange = function () {
+    store.settings.fillerOn = this.checked;
+    saveStore();
+    toast(this.checked
+      ? '关联词不判定：忽略词表中的字灰色显示，可打可不打，不计入正确率'
+      : '关联词判定已开启：所有字都需打对');
+  };
+  $('fillerWords').onchange = function () {
+    store.settings.fillerWords = this.value.trim() || FILLER_DEFAULT;
+    this.value = store.settings.fillerWords;
+    saveStore();
+    toast('忽略词表已更新：' + store.settings.fillerWords);
+  };
+  $('fillerProtect').onchange = function () {
+    store.settings.fillerProtect = this.value.trim() || FILLER_PROTECT_DEFAULT;
+    this.value = store.settings.fillerProtect;
+    saveStore();
+    toast('保护词表已更新：' + store.settings.fillerProtect);
+  };
+  $('optFade').onchange = function () {
+    store.settings.fadeFollow = this.checked;
+    saveStore();
+    toast(this.checked
+      ? '渐隐自动升档已开启：再打一遍按成绩升档；档位可随时在练习页手动切换'
+      : '渐隐自动升档已关闭：再打一遍保持当前档位；仍可在练习页手动切换');
+  };
+  $('optRandomMask').onchange = function () {
+    store.settings.randomMask = this.checked;
+    saveStore();
+    updateFadeNote();
+    toast(this.checked
+      ? '随机隐藏已开启：同一档位每轮抽不同的词，采分点不再保底优先（换卡/再打一遍都会换一批）'
+      : '随机隐藏已关闭：恢复采分点优先隐藏');
+  };
+  $('optStuck').onchange = function () {
+    store.settings.stuckHint = this.checked;
+    saveStore();
+    toast(this.checked
+      ? '卡壳提示已开启：渐隐/全盲时 5 秒没打出来自动亮 2 字'
+      : '卡壳提示已关闭：卡住也不会自动提示');
+  };
+  Array.prototype.forEach.call($('fadeSeg').children, function (b) {
+    b.onclick = function () {
+      if (!session || session.method !== 'follow') return;
+      const fz = Number(b.dataset.fz);
+      store.settings.fadeLevel = fz;
+      saveStore();
+      loadCard(fz, true);
+      toast(fz === 0 ? '已切换：显示全文' : '已切换：渐隐' + fadePctText(fz) + '（本张及后续卡默认此档）');
+    };
+  });
+  ['fontSeg', 'fontSeg2'].forEach(function (segId) {
+    Array.prototype.forEach.call($(segId).children, function (b) {
+      b.onclick = function () {
+        store.settings.fs = b.dataset.fs;
+        store.settings.fsAuto = false;
+        saveStore();
+        applyFs(store.settings.fs);
+        toast('原文字号已设为「' + b.textContent + '」，所有卡片生效（含默写原文），长卡不再自动缩小');
+      };
+    });
+  });
+
+  const inp = $('pInput');
+  let composing = false;
+  inp.addEventListener('compositionstart', function () { composing = true; });
+  inp.addEventListener('compositionend', function () { composing = false; sync(); });
+  inp.addEventListener('input', function (e) {
+    if (cur) cur.lastActTs = Date.now();
+    if (!composing && !(e && e.isComposing)) sync();
+  });
+  inp.addEventListener('keydown', function (e) {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.ctrlKey || e.metaKey) {
+        if (cur && cur.method === 'recall' && !cur.finished) compareRecall();
+      } else if (cur && cur.finished && !$('btnNext').classList.contains('hidden')) {
+        nextCard();
+      }
+    }
+  });
+  inp.addEventListener('paste', function (e) { e.preventDefault(); toast('练习中禁止粘贴'); });
+  inp.addEventListener('drop', function (e) { e.preventDefault(); });
+
+  $('btnPeek').onclick = function () {
+    if (!cur || cur.method !== 'recall' || cur.finished) return;
+    cur.peeked = true;
+    $('recallCover').classList.add('hidden');
+    const w = $('pTextWrap');
+    w.classList.remove('hidden');
+    w.scrollTop = 0;
+    for (let i = 0; i < cur.spans.length; i++) {
+      cur.spans[i].classList.remove('ok', 'bad', 'auto', 'cur', 'hit', 'miss');
+    }
+    $('pTip').innerHTML = '已<b>开卷</b>：可对照原文继续写，本卡不计熟练度增长。';
+    renderRecallStats();
+  };
+  $('btnCompare').onclick = compareRecall;
+
+  document.addEventListener('keydown', function (e) {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (!$('viewSelect').classList.contains('hidden')) {
+      if (e.key === 'Escape') { if (confirmExitQuiz()) quitQuiz(true); return; }
+      if (!quiz || quiz.answered || quiz.over) return;
+      const n = Number(e.key);
+      if (n >= 1 && n <= 4) { onQuizChoice(n - 1); return; }
+      const letters = { a: 0, b: 1, c: 2, d: 3 };
+      const li = letters[String(e.key).toLowerCase()];
+      if (li != null) onQuizChoice(li);
+      return;
+    }
+    if ($('viewPractice').classList.contains('hidden')) return;
+    if (e.key === 'Escape') { if (confirmExitPractice()) endSession(true); return; }
+    if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      navCard(e.key === 'ArrowLeft' ? -1 : 1);
+      return;
+    }
+    if (e.key === 'Enter' && cur && cur.finished) {
+      e.preventDefault();
+      if (!$('btnNext').classList.contains('hidden')) nextCard();
+    }
+  });
+
+  $('btnExport').onclick = function () {
+    const blob = new Blob([JSON.stringify(store, null, 1)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '法考打字进度_' + todayStr().replace(/-/g, '') + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  $('btnImport').onclick = function () { $('fileImport').click(); };
+  $('fileImport').onchange = function () {
+    const f = this.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const s = JSON.parse(reader.result);
+        if (!s || s.v !== 1 || !s.settings || !s.cards || !s.daily) throw 0;
+        const lc = Object.keys(store.cards || {}).length, lr = (store.records || []).length;
+        const ic = Object.keys(s.cards || {}).length, ir = (s.records || []).length;
+        if (!confirm('「合并导入」——不覆盖、不删除本机进度：\n· 每张卡取更高的熟练度/进度\n· 每日练习量累加、练习记录合并去重\n· 界面设置以本机为准\n\n本机：' + lc + ' 张卡 / ' + lr + ' 条记录\n导入文件：' + ic + ' 张卡 / ' + ir + ' 条记录\n\n确定合并导入？（如需完全替换本机进度，请先「重置」再导入）')) return;
+        store = mergeStore(store, s);
+        saveStore();
+        renderHome();
+        toast('已合并导入：卡片 ' + lc + '→' + Object.keys(store.cards).length + '，记录 ' + lr + '→' + store.records.length);
+      } catch (e) { toast('文件格式不对，导入失败'); }
+    };
+    reader.readAsText(f);
+    this.value = '';
+  };
+  $('btnReset').onclick = function () {
+    if (!confirm('确定清空全部练习进度？此操作不可恢复。')) return;
+    if (!confirm('再次确认：真的要清空吗？')) return;
+    store = loadStore();
+    store.cards = {}; store.daily = {}; store.records = []; delete store.pending;
+    saveStore();
+    renderHome();
+    toast('已重置');
+  };
+}
+
+/* ================= 启动 ================= */
+if (typeof document !== 'undefined' && document.getElementById('viewHome')) {
+  bindEvents();
+  applyFs(store.settings.fs || 'm');
+  renderHome();
+  try {
+    console.log('%c✦ 杜洪波私塾班7群 恩格 出品 · 法考四页纸打字工作台 V4 ✦', 'color:#8a6d3b;font-weight:bold;font-size:14px;letter-spacing:1px;');
+  } catch (e) { }
+  /* 关标签页/刷新兜底：有未提交输入或未答完的选择题时，浏览器弹出原生确认 */
+  window.addEventListener('beforeunload', function (e) {
+    const typing = cur && !cur.finished && $('pInput') && $('pInput').value.length > 0;
+    const quizLive = quiz && !quiz.over && (quiz.correct + quiz.wrong) > 0;
+    if (typing || quizLive) { e.preventDefault(); e.returnValue = ''; }
+  });
+  setInterval(function () {
+    if (!cur || cur.finished || !cur.startTs) return;
+    if (cur.method === 'recall') renderRecallStats();
+    else renderLiveStats(computeStats(cur.card.target, cur.lane, normalizeRaw($('pInput').value, !!store.settings.skipPunct, activeFillerRe()), $('pInput').value.replace(/\s/g, '').slice(-1) || undefined));
+  }, 1000);
+} else if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { buildCatalog: buildCatalog, buildLanes: buildLanes, computeStats: computeStats,
+    normalizeRaw: normalizeRaw, lcsMarks: lcsMarks, hintByLevel: hintByLevel, buildHintMask: buildHintMask,
+    skeletonOf: skeletonOf, pickMask: pickMask, wordUnits: wordUnits, wordDict: wordDict,
+    FADE_STEPS: FADE_STEPS, seededShuffle: seededShuffle,
+    hashSeed: hashSeed, PUNCT: PUNCT, DATA: DATA };
+}
+</script>
+</body>
+</html>
